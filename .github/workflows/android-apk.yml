@@ -38,16 +38,49 @@ jobs:
       - name: Create Android project
         run: npx cap add android
 
-      - name: Configure landscape and fullscreen
+      - name: Configure landscape, fullscreen and ZERO launcher icon
         run: |
           python3 - <<'PY'
           from pathlib import Path
           p = Path("android/app/src/main/AndroidManifest.xml")
-          s = p.read_text()
-          s = s.replace('android:name=".MainActivity"', 'android:name=".MainActivity" android:screenOrientation="landscape"')
-          s = s.replace('android:theme="@style/AppTheme.NoActionBar"', 'android:theme="@android:style/Theme.Material.Light.NoActionBar.Fullscreen"')
-          p.write_text(s)
+          manifest = p.read_text()
+          manifest = manifest.replace('android:name=".MainActivity"', 'android:name=".MainActivity" android:screenOrientation="landscape"')
+          manifest = manifest.replace('android:theme="@style/AppTheme.NoActionBar"', 'android:theme="@android:style/Theme.Material.Light.NoActionBar.Fullscreen"')
+          p.write_text(manifest)
           PY
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          RES="android/app/src/main/res"
+          mkdir -p "$RES/drawable" "$RES/mipmap-anydpi-v26" "$RES/values"
+          cat > "$RES/drawable/zero_icon_background.xml" <<'XML'
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+            <solid android:color="#10162E"/>
+          </shape>
+          XML
+          cat > "$RES/drawable/ic_zero_foreground.xml" <<'XML'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="108dp" android:height="108dp"
+              android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#4F8BEF" android:pathData="M54,5 L96,21 L92,69 L54,103 L16,69 L12,21 Z"/>
+            <path android:fillColor="#111B3E" android:pathData="M54,13 L87,25 L84,64 L54,91 L24,64 L21,25 Z"/>
+            <path android:fillColor="#F5FCFF" android:pathData="M30,31 L78,31 L78,42 L46,68 L78,68 L78,80 L30,80 L30,69 L62,43 L30,43 Z"/>
+            <path android:fillColor="#FFB86B" android:pathData="M77,20 L88,24 L81,43 L72,40 Z"/>
+          </vector>
+          XML
+          cat > "$RES/mipmap-anydpi-v26/ic_launcher.xml" <<'XML'
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+            <background android:drawable="@drawable/zero_icon_background"/>
+            <foreground android:drawable="@drawable/ic_zero_foreground"/>
+          </adaptive-icon>
+          XML
+          cp "$RES/mipmap-anydpi-v26/ic_launcher.xml" "$RES/mipmap-anydpi-v26/ic_launcher_round.xml"
+          for item in "mdpi 48" "hdpi 72" "xhdpi 96" "xxhdpi 144" "xxxhdpi 192"; do
+            set -- $item
+            density="$1"; size="$2"
+            mkdir -p "$RES/mipmap-$density"
+            rsvg-convert -w "$size" -h "$size" public/zero-icon.svg > "$RES/mipmap-$density/ic_launcher.png"
+            cp "$RES/mipmap-$density/ic_launcher.png" "$RES/mipmap-$density/ic_launcher_round.png"
+          done
 
       - name: Build debug APK
         run: |
