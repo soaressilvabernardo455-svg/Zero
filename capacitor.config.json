@@ -1,0 +1,15 @@
+{
+  "appId": "com.zero.game",
+  "appName": "ZERO",
+  "webDir": "public",
+  "server": {
+    "url": "https://zero-game.onrender.com",
+    "cleartext": false,
+    "allowNavigation": [
+      "zero-game.onrender.com"
+    ]
+  },
+  "android": {
+    "backgroundColor": "#080b18"
+  }
+}
