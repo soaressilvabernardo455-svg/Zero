@@ -618,10 +618,7 @@ export class Game {
     this.player.y += this.velocityY * dt;
     if (this.player.y < 0) { this.player.y = 0; this.velocityY = 0; this.grounded = true; }
 
-    this.playerVisual.position.copy(this.player);
-    this.playerVisual.rotation.y = this.yaw;
     this.currentStance = input.prone ? "prone" : input.crouch ? "crouch" : "stand";
-    this.playerVisual.scale.y = input.prone ? 0.38 : input.crouch ? 0.68 : 1;
     for (const target of this.targets) {
       const ai = target.userData;
       ai.phase += dt;
