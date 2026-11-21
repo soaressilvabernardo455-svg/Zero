@@ -7,8 +7,8 @@ export const CONFIG = Object.freeze({
   fireCooldown: 0.19,
   magazineSize: 12,
   reserveAmmo: 60,
-  targetCount: 8,
-  mapSize: 100,
+  targetCount: 10,
+  mapSize: 220,
   cameraModes: ["first", "third", "front"]
 });
 
