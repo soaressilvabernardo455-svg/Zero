@@ -71,6 +71,7 @@ export class Game {
     this.pitch = 0;
     this.grounded = true;
     this.health = 100;
+    this.currentStance = "stand";
     this.score = 0;
     this.ammo = CONFIG.magazineSize;
     this.reserve = CONFIG.reserveAmmo;
@@ -415,7 +416,8 @@ export class Game {
       originX: x, originZ: z, phase: index * 0.82, hit: 0, meshes: [],
       patrolRadius: 2.7 + (index % 3) * 0.9,
       patrolSpeed: 0.32 + (index % 4) * 0.07,
-      patrolOffset: index * 1.7
+      patrolOffset: index * 1.7,
+      aiShot: 1.2 + (index % 4) * 0.5, aiStance: 0, aiStanceTime: 2, botHealth: 3
     };
     bot.traverse((obj) => { if (obj.isMesh) bot.userData.meshes.push(obj); });
     this.scene.add(bot);
@@ -604,7 +606,8 @@ export class Game {
     const move = normalize2(input.moveX, input.moveY);
     const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
     const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
-    const speed = CONFIG.playerSpeed * (input.sprint ? CONFIG.sprintMultiplier : 1);
+    const stanceSpeed = input.prone ? 0.28 : input.crouch ? 0.58 : 1;
+    const speed = CONFIG.playerSpeed * (input.sprint && !input.crouch && !input.prone ? CONFIG.sprintMultiplier : 1) * stanceSpeed;
     const delta = new THREE.Vector3()
       .addScaledVector(forward, move.y * speed * dt)
       .addScaledVector(right, move.x * speed * dt);
@@ -617,6 +620,8 @@ export class Game {
 
     this.playerVisual.position.copy(this.player);
     this.playerVisual.rotation.y = this.yaw;
+    this.currentStance = input.prone ? "prone" : input.crouch ? "crouch" : "stand";
+    this.playerVisual.scale.y = input.prone ? 0.38 : input.crouch ? 0.68 : 1;
     this.playerVisual.visible = this.cameraMode !== 0;
     const parts = this.playerVisual.userData.parts;
     const moving = Math.min(1, Math.hypot(move.x, move.y));
@@ -627,14 +632,40 @@ export class Game {
     parts.rightArm.rotation.x = stride * 0.58;
 
     for (const target of this.targets) {
-      target.userData.phase += dt;
-      const patrol = target.userData.phase * target.userData.patrolSpeed + target.userData.patrolOffset;
-      target.position.x = target.userData.originX + Math.cos(patrol) * target.userData.patrolRadius;
-      target.position.z = target.userData.originZ + Math.sin(patrol * 0.72) * target.userData.patrolRadius * 0.72;
-      target.position.y = Math.sin(target.userData.phase * 1.8) * 0.09;
-      target.rotation.y = -Math.atan2(Math.cos(patrol * 0.72) * 0.72, -Math.sin(patrol));
-      target.userData.hit = Math.max(0, target.userData.hit - dt);
-      target.visible = target.userData.hit <= 0;
+      const ai = target.userData;
+      ai.phase += dt;
+      const dx = this.player.x - target.position.x;
+      const dz = this.player.z - target.position.z;
+      const distance = Math.hypot(dx, dz);
+      if (distance < 34 && distance > 7) {
+        const step = Math.min(distance - 6, dt * 2.6);
+        target.position.x += dx / Math.max(distance, 0.001) * step;
+        target.position.z += dz / Math.max(distance, 0.001) * step;
+      } else if (distance >= 34) {
+        const patrol = ai.phase * ai.patrolSpeed + ai.patrolOffset;
+        target.position.x = ai.originX + Math.cos(patrol) * ai.patrolRadius;
+        target.position.z = ai.originZ + Math.sin(patrol * 0.72) * ai.patrolRadius * 0.72;
+      }
+      target.rotation.y = Math.atan2(-dx, -dz);
+      ai.aiStanceTime -= dt;
+      if (ai.aiStanceTime <= 0) {
+        ai.aiStance = distance < 23 && Math.random() < 0.65 ? (Math.random() < 0.5 ? 1 : 2) : 0;
+        ai.aiStanceTime = 1.8 + Math.random() * 2.2;
+      }
+      target.scale.y = ai.aiStance === 2 ? 0.42 : ai.aiStance === 1 ? 0.72 : 1;
+      ai.aiShot -= dt;
+      if (distance < 30 && distance > 3 && ai.aiShot <= 0) {
+        const origin = target.position.clone().add(new THREE.Vector3(0, ai.aiStance === 2 ? 0.65 : ai.aiStance === 1 ? 1 : 1.35, 0));
+        const aimY = this.player.y + (this.currentStance === "prone" ? 0.45 : this.currentStance === "crouch" ? 0.9 : 1.25);
+        const direction = new THREE.Vector3(this.player.x - origin.x, aimY - origin.y, this.player.z - origin.z).normalize();
+        const bolt = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshBasicMaterial({ color: 0xff8a58 }));
+        bolt.position.copy(origin);
+        this.scene.add(bolt);
+        this.projectiles.push({ mesh: bolt, velocity: direction.multiplyScalar(CONFIG.projectileSpeed * 0.62), life: 2.2, previous: origin.clone(), bot: true });
+        ai.aiShot = 1.7 + Math.random() * 1.5;
+      }
+      ai.hit = Math.max(0, ai.hit - dt);
+      target.visible = ai.hit <= 0;
     }
 
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
@@ -643,7 +674,12 @@ export class Game {
       const stepLength = projectile.velocity.length() * dt;
       projectile.mesh.position.addScaledVector(projectile.velocity, dt);
       projectile.life -= dt;
-      const hit = projectile.remote ? false : this.hitTarget(projectile, stepLength);
+      let hit = projectile.remote || projectile.bot ? false : this.hitTarget(projectile, stepLength);
+      if (projectile.bot && projectile.mesh.position.distanceTo(this.player.clone().add(new THREE.Vector3(0, this.currentStance === "prone" ? 0.45 : this.currentStance === "crouch" ? 0.9 : 1.1, 0))) < 0.72) {
+        this.health = Math.max(0, this.health - 8);
+        this.onHud({ health: this.health });
+        hit = true;
+      }
       if (hit || projectile.life <= 0 || projectile.mesh.position.length() > 500) {
         this.scene.remove(projectile.mesh);
         projectile.mesh.geometry.dispose();
@@ -677,7 +713,8 @@ export class Game {
   }
 
   updateCamera(dt) {
-    const eye = this.player.clone().add(new THREE.Vector3(0, 1.63, 0));
+    const eyeHeight = this.currentStance === "prone" ? 0.55 : this.currentStance === "crouch" ? 1.05 : 1.63;
+    const eye = this.player.clone().add(new THREE.Vector3(0, eyeHeight, 0));
     const forward = new THREE.Vector3(
       -Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),
@@ -721,6 +758,9 @@ export class Game {
     this.playerVisual.visible = false;
     for (const target of this.targets) {
       target.userData.hit = 0;
+      target.userData.aiShot = 1.2 + Math.random();
+      target.userData.aiStance = 0;
+      target.scale.y = 1;
       target.visible = true;
       target.position.set(target.userData.originX, 0, target.userData.originZ);
       target.rotation.set(0, 0, 0);
