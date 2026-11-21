@@ -15,8 +15,23 @@ const readyButton = document.getElementById("ready-button");
 const startMatchButton = document.getElementById("start-match-button");
 const networkToast = document.getElementById("network-toast");
 
-const game = new Game(canvas, updateHud);
-const input = new InputController(canvas, Number(sensitivity.value));
+let game = null;
+let input = null;
+function ensureGame() {
+  if (game && input) return true;
+  try {
+    game = new Game(canvas, updateHud);
+    input = new InputController(canvas, Number(sensitivity.value));
+    game.setQuality(document.getElementById("quality").value);
+    return true;
+  } catch (error) {
+    game = null;
+    input = null;
+    console.error("ZERO game initialization failed:", error);
+    showLobbyMessage("Não foi possível iniciar o motor 3D neste navegador. Atualize a página e tente novamente.", "error");
+    return false;
+  }
+}
 const socket = typeof window.io === "function" ? window.io({ transports: ["websocket", "polling"] }) : null;
 let active = false;
 let paused = false;
@@ -91,11 +106,12 @@ function renderRoom(room) {
   startMatchButton.disabled = room.players.length < 2 || room.players.some((player) => !player.ready);
   showLobbyMessage(room.started ? "Partida iniciada. Conectando ao campo…" : "Compartilhe o código para chamar sua equipe.", "success");
   if (active && currentMode === "multiplayer") {
-    game.setRemotePlayers(room.players.filter((player) => !socket || player.id !== socket.id));
+    if (game) game.setRemotePlayers(room.players.filter((player) => !socket || player.id !== socket.id));
   }
 }
 
 function startGame(mode) {
+  if (!ensureGame()) return;
   currentMode = mode;
   active = true;
   paused = false;
@@ -104,11 +120,11 @@ function startGame(mode) {
   game.reset();
   lastShotSequence = game.lastShotSequence || 0;
   if (mode === "multiplayer" && currentRoom) {
-    game.setRemotePlayers(currentRoom.players.filter((player) => !socket || player.id !== socket.id));
+    if (game) game.setRemotePlayers(currentRoom.players.filter((player) => !socket || player.id !== socket.id));
     document.getElementById("match-indicator").textContent = "SALA " + currentRoom.code;
     networkToast.classList.add("hidden");
   } else {
-    game.setRemotePlayers([]);
+    if (game) game.setRemotePlayers([]);
     document.getElementById("match-indicator").textContent = "TREINO SOLO";
   }
   lobby.classList.add("hidden");
@@ -216,10 +232,10 @@ document.getElementById("exit-button").addEventListener("click", returnToLobby);
 document.getElementById("pause-exit-button").addEventListener("click", returnToLobby);
 document.getElementById("resume-button").addEventListener("click", resumeGame);
 sensitivity.addEventListener("input", () => {
-  input.setSensitivity(sensitivity.value);
+  if (input) input.setSensitivity(sensitivity.value);
   sensitivityValue.textContent = Number(sensitivity.value).toFixed(1) + "x";
 });
-document.getElementById("quality").addEventListener("change", (event) => game.setQuality(event.target.value));
+document.getElementById("quality").addEventListener("change", (event) => { if (game) game.setQuality(event.target.value); });
 window.addEventListener("keydown", (event) => {
   if (event.code === "Escape" && active) {
     if (paused) resumeGame();
@@ -260,7 +276,7 @@ if (socket) {
     if (!currentRoom || !player || !player.id) return;
     const index = currentRoom.players.findIndex((item) => item.id === player.id);
     if (index >= 0) currentRoom.players[index] = { ...currentRoom.players[index], ...player };
-    game.setRemotePlayers(currentRoom.players.filter((item) => item.id !== socket.id));
+    if (game) game.setRemotePlayers(currentRoom.players.filter((item) => item.id !== socket.id));
   });
   socket.on("game:player-left", (playerId) => {
     if (!currentRoom) return;
