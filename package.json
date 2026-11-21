@@ -8,7 +8,8 @@
     "start": "node server.js",
     "test": "node --test",
     "check": "node --check server.js && node --check public/js/game.js && node --check public/js/main.js && node --check public/js/input.js && node --check server/room-manager.js",
-    "android:prepare": "node scripts/prepare-android.js"
+    "android:prepare": "node scripts/prepare-android.js",
+    "postinstall": "node scripts/prepare-android.js"
   },
   "dependencies": {
     "express": "^4.21.2",
