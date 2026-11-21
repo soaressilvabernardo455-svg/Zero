@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { WEAPONS } from "./weapons.js";
 import { CONFIG, clamp, normalize2 } from "./config.js";
 
 function makeFloorTexture() {
@@ -85,6 +86,11 @@ export class Game {
     this.cameraBlockers = [];
     this.remotePlayers = new Map();
     this.createWorld();
+    this.weaponModel = WEAPONS.create("m4", "Padrão");
+    this.weaponModel.position.set(0.34, -0.28, -0.58);
+    this.weaponModel.rotation.set(-0.04, 0.02, 0);
+    this.weaponModel.scale.setScalar(0.78);
+    this.camera.add(this.weaponModel);
     this.resize();
     this._resize = () => this.resize();
     this._orientationResize = () => {
@@ -519,6 +525,7 @@ export class Game {
     if (this.ammo <= 0) { this.reload(); return; }
     this.ammo--;
     this.cooldown = CONFIG.fireCooldown;
+    WEAPONS.fire(this.weaponModel);
     const direction = new THREE.Vector3(
       -Math.sin(this.yaw) * Math.cos(this.pitch),
       Math.sin(this.pitch),
@@ -586,6 +593,7 @@ export class Game {
   update(dt, input) {
     dt = Math.min(Math.max(dt, 0), 0.04);
     this.clock += dt;
+    WEAPONS.update(this.weaponModel, dt);
     this.updateDayNight(dt);
     const area = this.player.x < -48 && this.player.z > 45 ? "MANSÃO" :
       this.player.z < -40 && Math.abs(this.player.x) < 60 ? "VILA DO NORTE" :
@@ -723,6 +731,7 @@ export class Game {
     }
     const target = this.cameraMode === 2 ? eye.clone().addScaledVector(forward, -7) : eye.clone().addScaledVector(forward, 12);
     this.camera.lookAt(target);
+    if (this.weaponModel) this.weaponModel.visible = this.cameraMode === 0;
   }
 
   reset() {
