@@ -52,6 +52,7 @@ function updateHud(data) {
   if (data.health !== undefined) document.getElementById("health").textContent = data.health;
   if (data.score !== undefined) document.getElementById("score").textContent = data.score;
   if (data.ammo !== undefined) document.getElementById("ammo").textContent = data.ammo;
+  if (data.worldTime !== undefined) document.getElementById("world-time").textContent = data.worldTime;
   if (data.hit) {
     const marker = document.getElementById("hit-feedback");
     marker.classList.add("hit");
