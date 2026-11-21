@@ -172,6 +172,38 @@
 \n.world-state{margin-left:auto;padding:7px 10px;border:1px solid rgba(130,221,164,.22);border-radius:7px;background:rgba(11,34,28,.76);font-size:8px;font-weight:900;letter-spacing:.1em;color:#b7f2bd;white-space:nowrap}
 @media (pointer:coarse){.world-state{font-size:7px;padding:6px 7px}.hud-top{gap:5px}.hud-stats{flex-wrap:nowrap}}
 
+  /* Lobby compacto para celular: sem rolagem vertical na entrada */
+@media screen and (orientation:landscape) and (max-height:620px) and (max-width:1100px){
+  .screen{overflow:hidden;padding:34px 16px 8px}
+  .lobby-topbar{padding:0 0 7px;min-height:40px}
+  .lobby-layout{display:grid;grid-template-columns:minmax(0,1fr);align-items:center;gap:0;flex:1;min-height:0;padding:6px 0}
+  .hero-copy{display:none}
+  .lobby-card{width:min(700px,100%);max-width:700px;justify-self:center;padding:10px 15px;border-radius:12px}
+  .card-heading{margin-bottom:7px}
+  .card-heading h2{font-size:16px;margin-top:3px}
+  .field-label{font-size:8px;margin-bottom:4px}
+  .text-field{height:34px}
+  .action-primary{margin-top:7px}
+  .action-button{min-height:43px}
+  .divider-label{margin:8px 0 6px}
+  .online-actions .action-button{min-height:45px}
+  .join-row{margin-top:6px}
+  .feedback{min-height:11px;margin:5px 0 0}
+  .settings-row{grid-template-columns:100px 1fr;margin-top:7px;padding-top:7px;gap:12px}
+  .lobby-footer{display:none}
+}
+@media screen and (max-width:760px) and (orientation:portrait){
+  .screen{overflow-y:auto;padding:12px 12px}
+  .lobby-layout{padding:10px 0;gap:0}
+  .hero-copy{display:none}
+  .lobby-card{max-width:560px;padding:15px}
+}
+#hud.touch-mode #mobile-controls{display:block!important;z-index:4}
+#hud.touch-mode #joystick-zone,#hud.touch-mode #look-zone{pointer-events:auto;touch-action:none}
+#hud.touch-mode .touch-button,#hud.touch-mode .sprint-button{display:grid;pointer-events:auto;z-index:5}
+#hud.touch-mode #fire-button{right:max(76px,calc(env(safe-area-inset-right) + 48px));bottom:max(105px,14vh)}
+#hud.touch-mode #jump-button{right:max(86px,calc(env(safe-area-inset-right) + 55px));bottom:max(22px,calc(env(safe-area-inset-bottom) + 16px))}
+
   </style>
   <script type="importmap">
     {
