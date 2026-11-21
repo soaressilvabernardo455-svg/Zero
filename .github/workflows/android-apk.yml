@@ -8,7 +8,7 @@ on:
       - "public/js/game.js"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -87,11 +87,28 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk "$GITHUB_WORKSPACE/ZERO.apk"
 
-      - name: Upload APK
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: ZERO-Android-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: ZERO.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Publish permanent Android APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: zero-android-v1.0
+          name: ZERO Android v1.0
+          body: |
+            Versão Android oficial do ZERO.
+            Compatível com orientação horizontal e interface de toque.
+            O jogo carrega a arena hospedada e precisa de conexão com a internet.
+          files: ZERO.apk
+          fail_on_unmatched_files: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
