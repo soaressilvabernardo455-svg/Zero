@@ -30,3 +30,27 @@ if (fs.existsSync(manifest)) {
   fs.writeFileSync(manifest, xml);
   console.log("Configured Android manifest for landscape.");
 }
+
+const activity = path.join(root, "android", "app", "src", "main", "java", "com", "zero", "game", "MainActivity.java");
+if (fs.existsSync(activity)) {
+  let java = fs.readFileSync(activity, "utf8");
+  if (!java.includes("SYSTEM_UI_FLAG_IMMERSIVE_STICKY")) {
+    if (!java.includes("import android.os.Bundle;")) java = java.replace("import com.getcapacitor.BridgeActivity;", "import android.os.Bundle;\\nimport com.getcapacitor.BridgeActivity;");
+    java = java.replace(/\\{\\s*\\}/, `{
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().getDecorView().setSystemUiVisibility(
+            android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            | android.view.View.SYSTEM_UI_FLAG_FULLSCREEN
+            | android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        );
+    }
+}`);
+    fs.writeFileSync(activity, java);
+    console.log("Enabled immersive fullscreen mode.");
+  }
+}
