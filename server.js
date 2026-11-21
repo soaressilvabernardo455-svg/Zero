@@ -20,7 +20,17 @@ const publicDir = path.join(__dirname, "public");
 app.disable("x-powered-by");
 app.use(express.static(publicDir, {
   etag: true,
-  maxAge: process.env.NODE_ENV === "production" ? "1h" : 0
+  // Do not let mobile browsers keep an old lobby after a deployment.
+  maxAge: 0,
+  setHeaders(res, filePath) {
+    if (filePath.endsWith(".html")) {
+      res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+    } else if (filePath.endsWith(".js") || filePath.endsWith(".css")) {
+      res.setHeader("Cache-Control", "no-cache, must-revalidate");
+    }
+  }
 }));
 app.get("/health", (_req, res) => {
   res.json({ ok: true, game: "ZERO", multiplayer: true, status: "online" });
