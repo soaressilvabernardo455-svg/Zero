@@ -16,6 +16,8 @@ const io = new Server(httpServer, {
 const rooms = new RoomManager({ maxPlayers: 6 });
 const PORT = Number(process.env.PORT) || 3000;
 const publicDir = path.join(__dirname, "public");
+const threeBuildDir = path.join(__dirname, "node_modules", "three", "build");
+app.use("/vendor", express.static(threeBuildDir, { maxAge: "1d", immutable: true }));
 
 app.disable("x-powered-by");
 app.use(express.static(publicDir, {
