@@ -3,7 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#10162e">\n  <link rel="icon" type="image/svg+xml" href="/zero-icon.svg">\n  <link rel="apple-touch-icon" href="/zero-icon.svg">
+  <meta name="theme-color" content="#10162e">
+  <link rel="icon" type="image/svg+xml" href="/zero-icon.svg">
+  <link rel="apple-touch-icon" href="/zero-icon.svg">
   <meta name="description" content="ZERO — arena FPS arcade 3D com salas multiplayer online.">
   <title>ZERO — Arena</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -169,7 +171,8 @@
   #jump-button{right:46px;bottom:34px}
   .hud-actions{right:14px}
 }
-\n.world-state{margin-left:auto;padding:7px 10px;border:1px solid rgba(130,221,164,.22);border-radius:7px;background:rgba(11,34,28,.76);font-size:8px;font-weight:900;letter-spacing:.1em;color:#b7f2bd;white-space:nowrap}
+
+.world-state{margin-left:auto;padding:7px 10px;border:1px solid rgba(130,221,164,.22);border-radius:7px;background:rgba(11,34,28,.76);font-size:8px;font-weight:900;letter-spacing:.1em;color:#b7f2bd;white-space:nowrap}
 @media (pointer:coarse){.world-state{font-size:7px;padding:6px 7px}.hud-top{gap:5px}.hud-stats{flex-wrap:nowrap}}
 
   /* Lobby compacto para celular: sem rolagem vertical na entrada */
@@ -203,6 +206,24 @@
 #hud.touch-mode .touch-button,#hud.touch-mode .sprint-button{display:grid;pointer-events:auto;z-index:5}
 #hud.touch-mode #fire-button{right:max(76px,calc(env(safe-area-inset-right) + 48px));bottom:max(105px,14vh)}
 #hud.touch-mode #jump-button{right:max(86px,calc(env(safe-area-inset-right) + 55px));bottom:max(22px,calc(env(safe-area-inset-bottom) + 16px))}
+
+
+/* ZERO loading sequence */
+.loading-screen{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 34%,rgba(31,124,177,.28),transparent 45%),rgba(4,9,22,.92);backdrop-filter:blur(10px)}
+.loading-screen.hidden{display:none!important}
+.loading-card{width:min(440px,92vw);padding:30px 28px;border:1px solid rgba(105,221,255,.3);border-radius:18px;background:linear-gradient(145deg,rgba(18,35,68,.98),rgba(19,19,48,.98) 58%,rgba(45,23,62,.98));box-shadow:0 24px 90px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.08);text-align:center}
+.loading-brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:24px;letter-spacing:.32em;font-weight:950}
+.loading-brand span{width:38px;height:38px;display:grid;place-items:center;border:1px solid #80edff;background:linear-gradient(140deg,#16a5cc,#614bd0 70%,#9c4aa6);clip-path:polygon(0 0,100% 0,100% 72%,72% 100%,0 100%);font-size:23px}
+.loading-brand b{font-size:16px;color:#f4fbff}
+.loading-kicker{font-size:8px;font-weight:900;letter-spacing:.24em;color:#68e5ff}
+.loading-card h2{margin:9px 0 8px;font-size:clamp(20px,4vw,28px);letter-spacing:.08em;color:#f5f7ff}
+#loading-message{min-height:18px;margin:0 0 18px;color:#a8bed4;font-size:12px}
+.loading-track{height:9px;overflow:hidden;border:1px solid rgba(126,188,227,.24);border-radius:99px;background:rgba(4,13,31,.9)}
+.loading-track i{display:block;width:5%;height:100%;border-radius:99px;background:linear-gradient(90deg,#4be2f6,#718bff 58%,#cf7df7);box-shadow:0 0 16px rgba(82,202,255,.55);transition:width .22s ease}
+.loading-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:#7e9db8;font-size:8px;letter-spacing:.15em}
+#loading-percent{font-size:12px;color:#c4f8ff;font-variant-numeric:tabular-nums}
+.loading-tip{margin-top:24px;padding-top:13px;border-top:1px solid rgba(148,174,225,.15);color:#8ba2bd;font-size:9px;line-height:1.5}
+@media(max-width:520px){.loading-card{padding:24px 18px}.loading-brand{margin-bottom:19px}.loading-tip{margin-top:18px}}
 
   </style>
   <script type="importmap">
@@ -288,6 +309,17 @@
 
     <section id="pause-message" class="hidden">
       <div class="pause-card"><span class="section-kicker">ZERO // SISTEMA</span><h2>JOGO PAUSADO</h2><button id="resume-button" class="action-button action-primary">CONTINUAR</button><button id="pause-exit-button" class="leave-button">VOLTAR AO LOBBY</button></div>
+    </section>
+    <section id="loading-screen" class="loading-screen hidden" role="status" aria-live="polite" aria-label="Carregando partida">
+      <div class="loading-card">
+        <div class="loading-brand"><span>Z</span><b>ZERO</b></div>
+        <div class="loading-kicker">SISTEMA DE INICIALIZAÇÃO</div>
+        <h2>PREPARANDO A ARENA</h2>
+        <p id="loading-message">Preparando a arena...</p>
+        <div class="loading-track"><i id="loading-bar"></i></div>
+        <div class="loading-meta"><b id="loading-percent">5%</b><span>CARREGAMENTO DO JOGO</span></div>
+        <div class="loading-tip">DICA: use o analógico para se mover e arraste o lado direito para mirar</div>
+      </div>
     </section>
     <div id="toast" role="status"></div>
   </main>
