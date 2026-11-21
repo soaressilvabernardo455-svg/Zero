@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#102b4e"/><stop offset=".55" stop-color="#25245a"/><stop offset="1" stop-color="#421e50"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#62ecff"/><stop offset=".52" stop-color="#5989ff"/><stop offset="1" stop-color="#bd65d8"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#b9f7ff"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="12" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M256 43 426 105 406 306 256 455 106 306 86 105Z" fill="#09152d" opacity=".72" transform="translate(0 9)"/>
+  <path d="M256 46 420 106 400 300 256 442 112 300 92 106Z" fill="url(#shield)" stroke="#b9f5ff" stroke-width="8" filter="url(#glow)"/>
+  <path d="M256 76 389 124 372 283 256 398 140 283 123 124Z" fill="#111c3c" opacity=".86"/>
+  <path d="M166 151H346V201L230 311H346V361H166V311L282 201H166Z" fill="url(#letter)"/>
+  <path d="M346 151 379 164 366 206 346 201Z" fill="#ffb86b"/>
+  <path d="M139 376 185 422 256 442 327 422 373 376" fill="none" stroke="#55e6ff" stroke-width="10" stroke-linecap="round" opacity=".75"/>
+</svg>
