@@ -39,7 +39,7 @@ function ensureGame() {
     return false;
   }
 }
-const socket = typeof window.io === "function" ? window.io(window.ZERO_SERVER_URL || undefined, { transports: ["websocket", "polling"] }) : null;
+const socket = typeof window.io === "function" ? window.io({ transports: ["websocket", "polling"] }) : null;
 let active = false;
 let paused = false;
 let lastTime = 0;
