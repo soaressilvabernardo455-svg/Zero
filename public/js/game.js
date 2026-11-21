@@ -50,14 +50,14 @@ export class Game {
     this.scene.background = new THREE.Color(0x101e31);
     this.scene.fog = new THREE.Fog(0x9bb8a0, 95, 300);
     this.camera = new THREE.PerspectiveCamera(74, 1, 0.1, 380);
-    const mobile = matchMedia("(pointer:coarse)").matches;
+    const mobile = navigator.maxTouchPoints > 0 || matchMedia("(pointer:coarse)").matches || window.innerWidth < 1000;
     this.renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: !mobile,
       powerPreference: "high-performance",
       alpha: false
     });
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.6));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.0 : 1.6));
     this.renderer.shadowMap.enabled = !mobile;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
