@@ -1,3 +1,4 @@
+// APK build trigger: include the procedural weapons module in the ZERO Android package.
 import * as THREE from "three";
 import { WEAPONS } from "./weapons.js";
 import { CONFIG, clamp, normalize2 } from "./config.js";
