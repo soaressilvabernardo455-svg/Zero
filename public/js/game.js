@@ -87,6 +87,9 @@ export class Game {
     this.cameraBlockers = [];
     this.remotePlayers = new Map();
     this.createWorld();
+    // A arma é filha da câmera; a câmera precisa pertencer à cena para renderizar seus filhos.
+    this.scene.add(this.camera);
+    this.weaponIndex = WEAPONS.ids.indexOf("m4");
     this.weaponModel = WEAPONS.create("m4", "Padrão");
     this.weaponModel.position.set(0.34, -0.28, -0.58);
     this.weaponModel.rotation.set(-0.04, 0.02, 0);
@@ -469,6 +472,26 @@ export class Game {
     this.renderer.setPixelRatio(ratio);
     this.renderer.shadowMap.enabled = level === "high" && !mobile;
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
+  }
+
+  setWeapon(id) {
+    if (!WEAPONS.ids.includes(id)) return false;
+    if (this.weaponModel) this.camera.remove(this.weaponModel);
+    this.weaponModel = WEAPONS.create(id, "Padrão");
+    this.weaponModel.position.set(0.34, -0.28, -0.58);
+    this.weaponModel.rotation.set(-0.04, 0.02, 0);
+    this.weaponModel.scale.setScalar(0.78);
+    this.camera.add(this.weaponModel);
+    this.weaponIndex = WEAPONS.ids.indexOf(id);
+    const info = WEAPONS.info(id);
+    this.onHud({ weaponName: info.name });
+    return true;
+  }
+
+  cycleWeapon(direction = 1) {
+    const count = WEAPONS.ids.length;
+    this.weaponIndex = (this.weaponIndex + direction + count) % count;
+    return this.setWeapon(WEAPONS.ids[this.weaponIndex]);
   }
 
   setRemotePlayers(players) {
