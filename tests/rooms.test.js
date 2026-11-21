@@ -44,7 +44,7 @@ test("recusa entrada após início e ignora movimento fora da partida", () => {
   rooms.setReady("b", true);
   rooms.start("a");
   assert.equal(rooms.join("c", created.room.code, "Três").ok, false);
-  assert.equal(rooms.updatePlayer("a", { x: 999, z: -999, yaw: 0, pitch: 0 }).player.x, 50);
+  assert.equal(rooms.updatePlayer("a", { x: 999, z: -999, yaw: 0, pitch: 0 }).player.x, 108);
 });
 
 test("partida rápida encontra sala aberta e respeita o limite", () => {
@@ -70,7 +70,7 @@ test("ignora estado de movimento inválido e limita coordenadas", () => {
   rooms.start("a");
   assert.equal(rooms.updatePlayer("a", { x: "hack", z: 0, yaw: 0, pitch: 0 }), null);
   const update = rooms.updatePlayer("a", { x: -100, z: 100, yaw: 0, pitch: 9 });
-  assert.equal(update.player.x, -50);
-  assert.equal(update.player.z, 50);
+  assert.equal(update.player.x, -108);
+  assert.equal(update.player.z, 108);
   assert.equal(update.player.pitch, 1.2);
 });
