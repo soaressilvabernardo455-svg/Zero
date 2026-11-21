@@ -120,6 +120,7 @@ function renderRoom(room) {
 
 function startGame(mode) {
   if (!ensureGame()) return false;
+  try {
   currentMode = mode;
   active = true;
   paused = false;
@@ -139,8 +140,17 @@ function startGame(mode) {
   pause.classList.add("hidden");
   hud.classList.remove("hidden");
   requestAnimationFrame(loop);
-  if (matchMedia("(pointer:fine)").matches) canvas.requestPointerLock?.();
+  if (matchMedia("(pointer:fine)").matches && !(navigator.maxTouchPoints > 0)) canvas.requestPointerLock?.();
+  hud.classList.toggle("touch-mode", navigator.maxTouchPoints > 0 || matchMedia("(pointer:coarse)").matches || window.innerWidth < 1000);
   return true;
+  } catch (error) {
+    active = false;
+    lobby.classList.remove("hidden");
+    hud.classList.add("hidden");
+    showLobbyMessage("Falha ao entrar na partida: " + (error?.message || "erro desconhecido"), "error");
+    console.error("ZERO startGame failed:", error);
+    return false;
+  }
 }
 
 function loop(time) {
