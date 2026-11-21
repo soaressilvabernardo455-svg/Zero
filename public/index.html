@@ -208,6 +208,41 @@
 #hud.touch-mode #jump-button{right:max(86px,calc(env(safe-area-inset-right) + 55px));bottom:max(22px,calc(env(safe-area-inset-bottom) + 16px))}
 
 
+
+/* ZERO mobile landscape polish */
+@media screen and (orientation:landscape) and (max-height:620px){
+  .screen{overflow:hidden;padding:9px 22px}
+  .lobby-topbar{padding-bottom:5px}
+  .lobby-layout{grid-template-columns:minmax(0,1fr) minmax(300px,.82fr);gap:clamp(14px,3vw,38px);padding:5px 0;align-items:center}
+  .hero-copy h1{font-size:clamp(31px,5.6vw,58px);margin:9px 0}
+  .hero-copy p{font-size:11px;line-height:1.35;max-width:360px}
+  .hero-metrics{gap:16px;margin-top:12px}
+  .hero-metrics strong{font-size:17px}
+  .lobby-card{max-width:420px;padding:13px 16px}
+  .card-heading{margin-bottom:9px}
+  .card-heading h2{font-size:15px}
+  .action-button{min-height:44px;padding:8px 11px}
+  .action-button small{font-size:8px}
+  .online-actions{gap:7px}
+  .lobby-footer{padding-top:4px;font-size:7px}
+  .hud-top{gap:6px}
+  .hud-stats{gap:4px}
+  .hud-chip{padding:5px 7px}
+  #hud.touch-mode .hud-actions{top:56px;right:12px;gap:5px}
+  #hud.touch-mode .hud-button{padding:6px 8px;font-size:7px}
+  #hud.touch-mode #fire-button{right:clamp(22px,4vw,42px);bottom:clamp(82px,13vh,110px);width:68px;height:68px}
+  #hud.touch-mode #jump-button{right:clamp(34px,7vw,58px);bottom:clamp(16px,3vh,25px);width:52px;height:52px}
+  #hud.touch-mode #joystick-base{width:clamp(76px,17vh,100px);height:clamp(76px,17vh,100px);left:22px;bottom:15px}
+  #hud.touch-mode .sprint-button{left:24px;bottom:clamp(112px,19vh,145px)}
+}
+@media screen and (orientation:portrait) and (max-width:760px){
+  #hud.touch-mode .hud-actions{top:58px;right:8px;gap:5px}
+  #hud.touch-mode .hud-button{padding:6px 8px;font-size:7px}
+  #hud.touch-mode #fire-button{right:20px;bottom:112px;width:76px;height:76px}
+  #hud.touch-mode #jump-button{right:38px;bottom:24px}
+  #hud.touch-mode #joystick-base{left:18px;bottom:20px;width:94px;height:94px}
+}
+
 /* ZERO loading sequence */
 .loading-screen{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at 50% 34%,rgba(31,124,177,.28),transparent 45%),rgba(4,9,22,.92);backdrop-filter:blur(10px)}
 .loading-screen.hidden{display:none!important}
