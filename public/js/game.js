@@ -411,7 +411,12 @@ export class Game {
     const halo = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.045, 6, 28), makeGlow(0x4bdcff, 0.8));
     halo.rotation.x = Math.PI / 2; halo.position.y = 0.06; bot.add(halo);
     bot.position.set(x, 0, z);
-    bot.userData = { originX: x, originZ: z, phase: index * 0.82, hit: 0, meshes: [] };
+    bot.userData = {
+      originX: x, originZ: z, phase: index * 0.82, hit: 0, meshes: [],
+      patrolRadius: 2.4 + (index % 3) * 0.85,
+      patrolSpeed: 0.32 + (index % 4) * 0.07,
+      patrolOffset: index * 1.7
+    };
     bot.traverse((obj) => { if (obj.isMesh) bot.userData.meshes.push(obj); });
     this.scene.add(bot);
     this.targets.push(bot);
@@ -623,9 +628,11 @@ export class Game {
 
     for (const target of this.targets) {
       target.userData.phase += dt;
-      target.position.x = target.userData.originX + Math.sin(target.userData.phase * 0.8) * 1.15;
+      const patrol = target.userData.phase * target.userData.patrolSpeed + target.userData.patrolOffset;
+      target.position.x = target.userData.originX + Math.cos(patrol) * target.userData.patrolRadius;
+      target.position.z = target.userData.originZ + Math.sin(patrol * 0.72) * target.userData.patrolRadius * 0.72;
       target.position.y = Math.sin(target.userData.phase * 1.8) * 0.09;
-      target.rotation.y = Math.sin(target.userData.phase * 0.55) * 0.22;
+      target.rotation.y = -Math.atan2(Math.cos(patrol * 0.72) * 0.72, -Math.sin(patrol));
       target.userData.hit = Math.max(0, target.userData.hit - dt);
       target.visible = target.userData.hit <= 0;
     }
