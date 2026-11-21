@@ -86,7 +86,11 @@ export class Game {
     this.createWorld();
     this.resize();
     this._resize = () => this.resize();
+    this._orientationResize = () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => this.resize()));
+    };
     window.addEventListener("resize", this._resize);
+    window.addEventListener("orientationchange", this._orientationResize);
   }
 
   createWorld() {
@@ -726,6 +730,7 @@ export class Game {
 
   dispose() {
     window.removeEventListener("resize", this._resize);
+    window.removeEventListener("orientationchange", this._orientationResize);
     this.renderer.dispose();
   }
 }
