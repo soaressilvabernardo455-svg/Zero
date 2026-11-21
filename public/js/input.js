@@ -114,7 +114,7 @@ export class InputController {
     const length = Math.hypot(dx, dy);
     const scale = length > this.joyRadius ? this.joyRadius / length : 1;
     const x = dx * scale, y = dy * scale;
-    this.move = { x: x / this.joyRadius, y: y / this.joyRadius };
+    this.move = { x: x / this.joyRadius, y: -y / this.joyRadius };
     knob.style.transform = "translate(" + x + "px," + y + "px)";
   }
 
