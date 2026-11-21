@@ -82,6 +82,7 @@ function updateHud(data) {
   if (data.score !== undefined) document.getElementById("score").textContent = data.score;
   if (data.ammo !== undefined) document.getElementById("ammo").textContent = data.ammo;
   if (data.worldTime !== undefined) document.getElementById("world-time").textContent = data.worldTime;
+  if (data.areaName !== undefined) document.getElementById("world-area").textContent = "ÁREA · " + data.areaName;
   if (data.hit) {
     const marker = document.getElementById("hit-feedback");
     marker.classList.add("hit");
