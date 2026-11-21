@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#080d16">
-  <meta name="description" content="ZERO - jogo FPS arcade 3D para navegador.">
-  <title>ZERO</title>
+  <meta name="theme-color" content="#081321">
+  <meta name="description" content="ZERO — arena FPS arcade 3D com salas multiplayer online.">
+  <title>ZERO — Arena</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="stylesheet" href="/css/style.css">
   <script type="importmap">
     {
@@ -17,55 +18,89 @@
 </head>
 <body>
   <main id="game-root">
-    <canvas id="game-canvas" aria-label="Campo de jogo 3D"></canvas>
+    <canvas id="game-canvas" aria-label="Arena 3D do ZERO"></canvas>
 
-    <section id="menu" class="overlay">
-      <div class="menu-panel">
-        <div class="eyebrow">ARCADE FPS</div>
-        <h1>ZERO</h1>
-        <p>Entre no campo de treino.</p>
-        <label for="quality">Qualidade gráfica</label>
-        <select id="quality">
-          <option value="high">Alta</option>
-          <option value="medium" selected>Média</option>
-          <option value="low">Baixa</option>
-        </select>
-        <label for="sensitivity">Sensibilidade <span id="sensitivity-value">1.0x</span></label>
-        <input id="sensitivity" type="range" min="0.4" max="2.5" step="0.1" value="1">
-        <button id="start-button" class="primary">JOGAR</button>
-        <small>PC: WASD + mouse · Celular: controles na tela</small>
+    <section id="lobby" class="screen">
+      <div class="lobby-topbar">
+        <div class="brand-lockup"><div class="brand-mark">Z</div><div><strong>ZERO</strong><small>COMBAT SIMULATION</small></div></div>
+        <div class="build-tag"><span class="live-dot"></span> ARENA ONLINE</div>
       </div>
+      <div class="lobby-layout">
+        <section class="hero-copy">
+          <div class="eyebrow"><span></span> SISTEMA DE TREINAMENTO TÁTICO</div>
+          <h1>DOMINE<br><em>O CAMPO.</em></h1>
+          <p>Entre na arena, treine sua mira e forme uma equipe com outros jogadores em salas online.</p>
+          <div class="hero-metrics">
+            <div><strong>3D</strong><span>ARENA</span></div>
+            <div><strong>06</strong><span>JOGADORES</span></div>
+            <div><strong>60 FPS*</strong><span>ALVO DE DESEMPENHO</span></div>
+          </div>
+          <div class="hero-note">*O desempenho varia conforme o aparelho e a qualidade gráfica.</div>
+        </section>
+
+        <section class="lobby-card">
+          <div class="card-heading"><div><span class="section-kicker">CENTRAL DE OPERAÇÕES</span><h2>ENTRAR NA ARENA</h2></div><div class="connection-pill" id="connection-state"><i></i><span>Conectando</span></div></div>
+          <label class="field-label" for="player-name">NOME DO JOGADOR</label>
+          <input id="player-name" class="text-field" type="text" maxlength="16" autocomplete="nickname" value="Operador" placeholder="Seu nome">
+          <button id="solo-button" class="action-button action-primary"><span class="action-icon">▶</span><span><b>JOGAR SOZINHO</b><small>Entrar no campo de treino</small></span><span class="action-arrow">›</span></button>
+          <div class="divider-label"><span></span> MULTIPLAYER ONLINE <span></span></div>
+          <div class="online-actions">
+            <button id="quick-match-button" class="action-button action-secondary"><span class="action-icon">⌁</span><span><b>PARTIDA RÁPIDA</b><small>Encontrar uma sala disponível</small></span></button>
+            <button id="create-room-button" class="action-button action-secondary"><span class="action-icon">＋</span><span><b>CRIAR SALA</b><small>Convidar amigos por código</small></span></button>
+          </div>
+          <div class="join-row"><input id="room-code" class="text-field code-field" type="text" maxlength="6" autocapitalize="characters" placeholder="CÓDIGO DA SALA"><button id="join-room-button" class="join-button">ENTRAR</button></div>
+          <p id="lobby-message" class="feedback" role="status">Conectando ao servidor multiplayer…</p>
+
+          <div id="room-panel" class="room-panel hidden">
+            <div class="room-heading"><div><span class="section-kicker">SALA PRIVADA</span><strong id="room-code-display">------</strong></div><button id="copy-code-button" class="copy-button">COPIAR CÓDIGO</button></div>
+            <div class="players-heading"><span>JOGADORES</span><span id="player-count">1 / 6</span></div>
+            <div id="players-list" class="players-list"></div>
+            <div class="room-actions"><button id="ready-button" class="ready-button">FICAR PRONTO</button><button id="start-match-button" class="start-match-button hidden">INICIAR PARTIDA</button></div>
+            <button id="leave-room-button" class="leave-button">SAIR DA SALA</button>
+          </div>
+
+          <div class="settings-row">
+            <div class="setting-field"><label for="quality">QUALIDADE</label><select id="quality" class="select-field"><option value="high">Alta</option><option value="medium" selected>Média</option><option value="low">Leve</option></select></div>
+            <div class="setting-field sensitivity-setting"><label for="sensitivity">SENSIBILIDADE <b id="sensitivity-value">1.0x</b></label><input id="sensitivity" type="range" min="0.4" max="2.5" step="0.1" value="1"></div>
+          </div>
+        </section>
+      </div>
+      <div class="lobby-footer"><span>ZERO // ARENA EXPERIMENTAL</span><span>PC: WASD + MOUSE&nbsp;&nbsp; • &nbsp;&nbsp; CELULAR: TOQUE</span></div>
     </section>
 
     <section id="hud" class="hidden" aria-live="polite">
       <div class="hud-top">
-        <div class="hud-chip">VIDA <strong id="health">100</strong></div>
-        <div class="hud-chip">ALVOS <strong id="score">0</strong></div>
-        <div class="hud-chip">MUNIÇÃO <strong id="ammo">12 / 60</strong></div>
+        <div class="hud-brand"><b>Z</b><span>ZERO</span></div>
+        <div class="hud-stats">
+          <div class="hud-chip"><i class="stat-health"></i><span>VIDA</span><strong id="health">100</strong></div>
+          <div class="hud-chip"><i class="stat-score"></i><span>PONTOS</span><strong id="score">0</strong></div>
+          <div class="hud-chip"><i class="stat-ammo"></i><span>ENERGIA</span><strong id="ammo">12 / 60</strong></div>
+        </div>
+        <div class="match-chip" id="match-indicator">TREINO SOLO</div>
       </div>
       <div id="crosshair"><i></i><b></b></div>
       <div id="hit-feedback"></div>
-      <div class="hud-bottom">
-        <button id="camera-button" class="hud-button">CÂMERA</button>
-        <button id="reload-button" class="hud-button">RECARREGAR</button>
-        <button id="exit-button" class="hud-button">SAIR</button>
+      <div class="hud-actions">
+        <button id="camera-button" class="hud-button">CÂMERA <b>C</b></button>
+        <button id="reload-button" class="hud-button">RECARREGAR <b>R</b></button>
+        <button id="exit-button" class="hud-button">SAIR <b>ESC</b></button>
       </div>
       <div id="mobile-controls">
         <div id="joystick-zone"><div id="joystick-base"><div id="joystick-knob"></div></div></div>
         <div id="look-zone" aria-label="Arraste para olhar"></div>
+        <button id="sprint-button" class="sprint-button">CORRER</button>
         <button id="fire-button" class="touch-button">DISPARAR</button>
         <button id="jump-button" class="touch-button">PULAR</button>
       </div>
+      <div id="network-toast" class="network-toast hidden">Aguardando conexão…</div>
     </section>
 
     <section id="pause-message" class="hidden">
-      <div class="menu-panel compact">
-        <h2>PAUSADO</h2>
-        <button id="resume-button" class="primary">CONTINUAR</button>
-      </div>
+      <div class="pause-card"><span class="section-kicker">ZERO // SISTEMA</span><h2>JOGO PAUSADO</h2><button id="resume-button" class="action-button action-primary">CONTINUAR</button><button id="pause-exit-button" class="leave-button">VOLTAR AO LOBBY</button></div>
     </section>
     <div id="toast" role="status"></div>
   </main>
+  <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>

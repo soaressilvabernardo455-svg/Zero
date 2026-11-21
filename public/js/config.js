@@ -1,14 +1,14 @@
 export const CONFIG = Object.freeze({
   playerSpeed: 7.2,
-  sprintMultiplier: 1.35,
+  sprintMultiplier: 1.45,
   jumpVelocity: 7.2,
   gravity: 19,
-  projectileSpeed: 42,
-  fireCooldown: 0.22,
+  projectileSpeed: 48,
+  fireCooldown: 0.19,
   magazineSize: 12,
   reserveAmmo: 60,
   targetCount: 8,
-  mapSize: 90,
+  mapSize: 100,
   cameraModes: ["first", "third", "front"]
 });
 

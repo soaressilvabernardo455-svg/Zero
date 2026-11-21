@@ -1,15 +1,17 @@
 {
   "name": "zero-game",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "ZERO - arcade FPS 3D para navegador e celular",
+  "description": "ZERO - FPS arcade 3D com salas multiplayer para navegador e celular",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test"
+    "test": "node --test",
+    "check": "node --check server.js && node --check public/js/game.js && node --check public/js/main.js && node --check public/js/input.js && node --check server/room-manager.js"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
   },
   "engines": {
     "node": ">=20"

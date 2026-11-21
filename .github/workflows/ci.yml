@@ -16,8 +16,4 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm test
-      - run: node --check server.js
-      - run: node --check public/js/config.js
-      - run: node --check public/js/input.js
-      - run: node --check public/js/game.js
-      - run: node --check public/js/main.js
+      - run: npm run check
