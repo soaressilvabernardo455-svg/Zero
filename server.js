@@ -109,9 +109,9 @@ io.on("connection", (socket) => {
       socket.data.lastShotAt = now;
       socket.to(room.code).emit("player:fire", {
         origin: {
-          x: Math.max(-60, Math.min(60, shot.origin.x)),
+          x: Math.max(-120, Math.min(120, shot.origin.x)),
           y: Math.max(0.2, Math.min(8, shot.origin.y)),
-          z: Math.max(-60, Math.min(60, shot.origin.z))
+          z: Math.max(-120, Math.min(120, shot.origin.z))
         },
         direction: {
           x: shot.direction.x / directionLength,
