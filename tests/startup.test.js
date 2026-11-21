@@ -11,7 +11,7 @@ test("lobby contains the loading screen and all controls required by InputContro
   for (const id of [
     "loading-screen", "loading-bar", "loading-percent", "loading-message",
     "solo-button", "joystick-zone", "joystick-base", "joystick-knob",
-    "look-zone", "fire-button", "jump-button", "sprint-button",
+    "look-zone", "fire-button", "jump-button", "sprint-button", "world-area", "world-time", "fps-value",
     "reload-button", "camera-button"
   ]) {
     assert.match(html, new RegExp('id="' + id + '"'), "missing #" + id);
@@ -24,7 +24,7 @@ test("solo startup waits for UI frames and renders before hiding the lobby", () 
   assert.match(main, /game\.renderFrame\(\)/);
   assert.ok(main.indexOf("game.renderFrame()") < main.indexOf('lobby.classList.add("hidden")'));
   assert.match(main, /startupInProgress/);
-  assert.match(main, /reportClientError\("startGame", error\)/);
+  assert.match(main, /reportClientError\("startGame", error\)/);\n  assert.match(main, /pointerup/);\n  assert.match(main, /reportClientError\("game-loop", error\)/);
 });
 
 test("game supports first-frame rendering and permanently daytime lighting", () => {
