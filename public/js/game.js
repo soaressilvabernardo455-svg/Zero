@@ -439,9 +439,15 @@ export class Game {
     this.renderer.setSize(width, height, false);
   }
 
+  renderFrame() {
+    this.resize();
+    this.updateCamera(0);
+    this.renderer.render(this.scene, this.camera);
+  }
+
   setQuality(level) {
-    const mobile = matchMedia("(pointer:coarse)").matches;
-    const ratio = level === "low" ? 0.9 : level === "high" ? Math.min(window.devicePixelRatio || 1, mobile ? 1.35 : 1.8) : Math.min(window.devicePixelRatio || 1, mobile ? 1.15 : 1.5);
+    const mobile = navigator.maxTouchPoints > 0 || matchMedia("(pointer:coarse)").matches || window.innerWidth < 1000;
+    const ratio = level === "low" ? (mobile ? 0.78 : 0.9) : level === "high" ? Math.min(window.devicePixelRatio || 1, mobile ? 1.15 : 1.8) : Math.min(window.devicePixelRatio || 1, mobile ? 1.0 : 1.5);
     this.renderer.setPixelRatio(ratio);
     this.renderer.shadowMap.enabled = level === "high" && !mobile;
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
