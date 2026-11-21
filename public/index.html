@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#081321">
   <meta name="description" content="ZERO — arena FPS arcade 3D com salas multiplayer online.">
   <title>ZERO — Arena</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
   <style>
 :root{color-scheme:dark;--bg:#081321;--panel:#101f31;--panel2:#14283d;--line:rgba(135,190,220,.19);--muted:#8da8bc;--text:#e9f5ff;--cyan:#55d9f5;--blue:#247fc1;--amber:#ffb467;--red:#ef6b5d}
 *{box-sizing:border-box}html,body,#game-root{width:100%;height:100%;margin:0;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,Roboto,Arial,sans-serif}body{overscroll-behavior:none;touch-action:none}button,input,select{font:inherit}button{cursor:pointer}#game-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;outline:0}.hidden{display:none!important}
@@ -238,7 +238,8 @@
       }
     });
   </script>
-  <script src="/socket.io/socket.io.js"></script>
+  <script>window.ZERO_SERVER_URL = "https://zero-game.onrender.com";</script>
+  <script src="/vendor/socket.io.min.js"></script>
   <script type="module" src="/js/main.js"></script>
 </body>
 </html>
