@@ -339,7 +339,13 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && active && !paused) pauseGame();
 });
 window.addEventListener("contextmenu", (event) => event.preventDefault());
-window.addEventListener("error", (event) => {\n  showToast("Ocorreu um erro. Confira a mensagem no lobby.");\n  if (window.__zeroModuleReady) reportClientError("window.error", event.error || event.message);\n});\nwindow.addEventListener("unhandledrejection", (event) => {\n  reportClientError("unhandledrejection", event.reason);\n});
+window.addEventListener("error", (event) => {
+  showToast("Ocorreu um erro. Confira a mensagem no lobby.");
+  if (window.__zeroModuleReady) reportClientError("window.error", event.error || event.message);
+});
+window.addEventListener("unhandledrejection", (event) => {
+  reportClientError("unhandledrejection", event.reason);
+});
 
 if (socket) {
   socket.on("connect", () => {
