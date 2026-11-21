@@ -413,7 +413,7 @@ export class Game {
     bot.position.set(x, 0, z);
     bot.userData = {
       originX: x, originZ: z, phase: index * 0.82, hit: 0, meshes: [],
-      patrolRadius: 2.4 + (index % 3) * 0.85,
+      patrolRadius: 2.7 + (index % 3) * 0.9,
       patrolSpeed: 0.32 + (index % 4) * 0.07,
       patrolOffset: index * 1.7
     };
