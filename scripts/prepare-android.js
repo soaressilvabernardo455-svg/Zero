@@ -35,8 +35,8 @@ const activity = path.join(root, "android", "app", "src", "main", "java", "com",
 if (fs.existsSync(activity)) {
   let java = fs.readFileSync(activity, "utf8");
   if (!java.includes("SYSTEM_UI_FLAG_IMMERSIVE_STICKY")) {
-    if (!java.includes("import android.os.Bundle;")) java = java.replace("import com.getcapacitor.BridgeActivity;", "import android.os.Bundle;\\nimport com.getcapacitor.BridgeActivity;");
-    java = java.replace(/\\{\\s*\\}/, `{
+    if (!java.includes("import android.os.Bundle;")) java = java.replace("import com.getcapacitor.BridgeActivity;", "import android.os.Bundle;\nimport com.getcapacitor.BridgeActivity;");
+    java = java.replace(/\{\s*\}/, `{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
