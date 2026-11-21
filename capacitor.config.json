@@ -1,8 +1,0 @@
-{
-  "appId": "com.zero.game",
-  "appName": "ZERO",
-  "webDir": "public",
-  "server": {
-    "androidScheme": "https"
-  }
-}
