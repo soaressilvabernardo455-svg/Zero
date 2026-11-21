@@ -20,16 +20,22 @@ let game = null;
 let input = null;
 function ensureGame() {
   if (game && input) return true;
+  let candidate = null;
   try {
-    game = new Game(canvas, updateHud);
-    input = new InputController(canvas, Number(sensitivity.value));
-    game.setQuality(document.getElementById("quality").value);
+    candidate = new Game(canvas, updateHud);
+    const controls = new InputController(canvas, Number(sensitivity.value));
+    candidate.setQuality(document.getElementById("quality").value);
+    game = candidate;
+    input = controls;
     return true;
   } catch (error) {
+    if (candidate) {
+      try { candidate.dispose(); } catch {}
+    }
     game = null;
     input = null;
     console.error("ZERO game initialization failed:", error);
-    showLobbyMessage("Falha ao iniciar o motor 3D: " + (error && error.message ? error.message.slice(0, 110) : "erro desconhecido") + ". Confira a conexão e tente novamente.", "error");
+    showLobbyMessage("Não iniciou: " + (error && error.message ? error.message.slice(0, 140) : "erro desconhecido") + ". Confira se o navegador permite WebGL e tente novamente.", "error");
     return false;
   }
 }
