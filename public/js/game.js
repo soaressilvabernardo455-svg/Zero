@@ -15,7 +15,6 @@ export class Game {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.clock = new THREE.Clock();
     this.player = new THREE.Vector3(0, 0, 12);
     this.velocityY = 0;
     this.yaw = Math.PI;
@@ -30,7 +29,7 @@ export class Game {
     this.cameraMode = 0;
     this.targets = [];
     this.projectiles = [];
-    this.running = false;
+    this.colliders = [];
     this.createWorld();
     this.resize();
     window.addEventListener("resize", () => this.resize());
@@ -50,7 +49,6 @@ export class Game {
     ground.rotation.x = -Math.PI/2;
     ground.receiveShadow = true;
     this.scene.add(ground);
-
     const grid = new THREE.GridHelper(100, 50, 0x8aa08a, 0x718571);
     grid.position.y = 0.012;
     this.scene.add(grid);
@@ -62,12 +60,14 @@ export class Game {
       mesh.position.set(x,y+h/2,z);
       mesh.castShadow = true; mesh.receiveShadow = true;
       this.scene.add(mesh);
+      this.colliders.push({x,z,halfX:w/2,halfZ:d/2});
     };
     addBox(-13,0,-8,12,6,2); addBox(13,0,-8,12,6,2);
     addBox(-24,0,12,2,4,18); addBox(24,0,12,2,4,18);
     addBox(0,0,-28,22,5,2);
     addBox(-8,0,4,3,1.5,3,boxMat); addBox(8,0,-1,3,1.5,3,boxMat);
     addBox(0,0,19,5,1.2,3,boxMat);
+
     for (let i=0;i<18;i++) {
       const x = (Math.random()-.5)*82, z = (Math.random()-.5)*82;
       if (Math.abs(x)<28 && Math.abs(z)<28) continue;
@@ -75,7 +75,20 @@ export class Game {
       trunk.position.set(x,1.2,z); trunk.castShadow=true; this.scene.add(trunk);
       const crown = new THREE.Mesh(new THREE.SphereGeometry(1.35,8,7), new THREE.MeshStandardMaterial({color:0x356b48,roughness:1}));
       crown.position.set(x,3,z); crown.castShadow=true; this.scene.add(crown);
+      this.colliders.push({x,z,halfX:.42,halfZ:.42});
     }
+
+    this.playerVisual = new THREE.Group();
+    const suit = new THREE.MeshStandardMaterial({color:0x243b55,roughness:.8});
+    const accent = new THREE.MeshStandardMaterial({color:0x39b8e8,emissive:0x082b3c});
+    const torso = new THREE.Mesh(new THREE.CapsuleGeometry(.38,.65,4,8),suit);
+    torso.position.y=1.05; torso.castShadow=true; this.playerVisual.add(torso);
+    const head = new THREE.Mesh(new THREE.SphereGeometry(.23,12,10),new THREE.MeshStandardMaterial({color:0xd1a987}));
+    head.position.y=1.72; head.castShadow=true; this.playerVisual.add(head);
+    const visor = new THREE.Mesh(new THREE.BoxGeometry(.32,.1,.08),accent);
+    visor.position.set(0,1.76,-.2); this.playerVisual.add(visor);
+    this.scene.add(this.playerVisual);
+
     const targetMat = new THREE.MeshStandardMaterial({color:0xe85c4d, emissive:0x48100b, roughness:.45});
     for(let i=0;i<CONFIG.targetCount;i++) {
       const target = new THREE.Group();
@@ -102,19 +115,20 @@ export class Game {
     this.renderer.setSize(this.canvas.clientWidth,this.canvas.clientHeight,false);
   }
 
-  start() { this.running = true; this.clock.start(); }
-  stop() { this.running = false; }
+  start() {}
+  stop() {}
 
   fire() {
     if (this.cooldown>0 || this.reloadTime>0) return;
     if (this.ammo<=0) { this.reload(); return; }
     this.ammo--; this.cooldown=CONFIG.fireCooldown;
-    const direction = new THREE.Vector3();
-    this.camera.getWorldDirection(direction);
-    const origin = this.camera.position.clone().addScaledVector(direction,.7);
-    const bolt = new THREE.Mesh(new THREE.SphereGeometry(.09,8,8), new THREE.MeshBasicMaterial({color:0x66dcff}));
+    const direction = new THREE.Vector3(-Math.sin(this.yaw)*Math.cos(this.pitch),Math.sin(this.pitch),-Math.cos(this.yaw)*Math.cos(this.pitch)).normalize();
+    const origin = this.cameraMode===0
+      ? this.camera.position.clone()
+      : this.player.clone().add(new THREE.Vector3(0,1.45,0));
+    const bolt = new THREE.Mesh(new THREE.SphereGeometry(.11,8,8), new THREE.MeshBasicMaterial({color:0x66dcff}));
     bolt.position.copy(origin); this.scene.add(bolt);
-    this.projectiles.push({mesh:bolt,velocity:direction.multiplyScalar(CONFIG.projectileSpeed),life:1.4});
+    this.projectiles.push({mesh:bolt,velocity:direction.multiplyScalar(CONFIG.projectileSpeed),life:1.8});
     this.onHud({ammo:this.ammo+" / "+this.reserve});
   }
 
@@ -123,10 +137,11 @@ export class Game {
     this.reloadTime=1.25;
   }
 
-  hitTarget(projectile) {
-    const ray = new THREE.Raycaster(projectile.mesh.position, projectile.velocity.clone().normalize(), 0, .65);
+  hitTarget(projectile, stepLength) {
+    const direction=projectile.velocity.clone().normalize();
+    const ray = new THREE.Raycaster(projectile.previous,direction,0,stepLength+.35);
     for(const target of this.targets) {
-      if(target.userData.hit>0) continue;
+      if(target.userData.hit>0 || !target.visible) continue;
       const meshes=[];
       target.traverse(o=>{if(o.isMesh)meshes.push(o);});
       if(ray.intersectObjects(meshes,false).length) {
@@ -137,6 +152,14 @@ export class Game {
       }
     }
     return false;
+  }
+
+  moveWithCollision(dx,dz) {
+    const radius=.48;
+    const nextX=clamp(this.player.x+dx,-48,48);
+    if(!this.colliders.some(c=>Math.abs(nextX-c.x)<c.halfX+radius && Math.abs(this.player.z-c.z)<c.halfZ+radius)) this.player.x=nextX;
+    const nextZ=clamp(this.player.z+dz,-48,48);
+    if(!this.colliders.some(c=>Math.abs(this.player.x-c.x)<c.halfX+radius && Math.abs(nextZ-c.z)<c.halfZ+radius)) this.player.z=nextZ;
   }
 
   update(dt, input) {
@@ -151,15 +174,17 @@ export class Game {
     const forward=new THREE.Vector3(-Math.sin(this.yaw),0,-Math.cos(this.yaw));
     const right=new THREE.Vector3(Math.cos(this.yaw),0,-Math.sin(this.yaw));
     const speed=CONFIG.playerSpeed*(input.sprint?CONFIG.sprintMultiplier:1);
-    this.player.addScaledVector(forward,-move.y*speed*dt);
-    this.player.addScaledVector(right,move.x*speed*dt);
-    this.player.x=clamp(this.player.x,-43,43);
-    this.player.z=clamp(this.player.z,-43,43);
+    const delta=new THREE.Vector3().addScaledVector(forward,-move.y*speed*dt).addScaledVector(right,move.x*speed*dt);
+    this.moveWithCollision(delta.x,delta.z);
 
     if(input.jump && this.grounded) {this.velocityY=CONFIG.jumpVelocity;this.grounded=false;}
     this.velocityY-=CONFIG.gravity*dt;
     this.player.y+=this.velocityY*dt;
     if(this.player.y<0){this.player.y=0;this.velocityY=0;this.grounded=true;}
+
+    this.playerVisual.position.copy(this.player);
+    this.playerVisual.rotation.y=this.yaw;
+    this.playerVisual.visible=this.cameraMode!==0;
 
     for(const target of this.targets) {
       target.userData.phase+=dt;
@@ -168,8 +193,11 @@ export class Game {
       target.visible=target.userData.hit<=0;
     }
     for(let i=this.projectiles.length-1;i>=0;i--) {
-      const p=this.projectiles[i]; p.mesh.position.addScaledVector(p.velocity,dt); p.life-=dt;
-      const hit=this.hitTarget(p);
+      const p=this.projectiles[i];
+      p.previous=p.mesh.position.clone();
+      const stepLength=p.velocity.length()*dt;
+      p.mesh.position.addScaledVector(p.velocity,dt); p.life-=dt;
+      const hit=this.hitTarget(p,stepLength);
       if(hit||p.life<=0){this.scene.remove(p.mesh);p.mesh.geometry.dispose();p.mesh.material.dispose();this.projectiles.splice(i,1);}
     }
     if(this.reloadTime>0) {
@@ -194,13 +222,4 @@ export class Game {
     const lookAt=this.cameraMode===2?eye.clone().addScaledVector(forward,-8):eye.clone().addScaledVector(forward,12);
     this.camera.lookAt(lookAt);
   }
-
-  frame() {
-    if(!this.running) return;
-    const dt=Math.min(this.clock.getDelta(),.04);
-    this.update(dt,this.getInput());
-    requestAnimationFrame(()=>this.frame());
-  }
-
-  getInput() { return {}; }
 }
