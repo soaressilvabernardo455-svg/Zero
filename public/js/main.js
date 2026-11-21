@@ -14,6 +14,7 @@ const roomPanel = document.getElementById("room-panel");
 const readyButton = document.getElementById("ready-button");
 const startMatchButton = document.getElementById("start-match-button");
 const networkToast = document.getElementById("network-toast");
+const soloButton = document.getElementById("solo-button");
 
 let game = null;
 let input = null;
@@ -28,7 +29,7 @@ function ensureGame() {
     game = null;
     input = null;
     console.error("ZERO game initialization failed:", error);
-    showLobbyMessage("Não foi possível iniciar o motor 3D neste navegador. Atualize a página e tente novamente.", "error");
+    showLobbyMessage("Falha ao iniciar o motor 3D: " + (error && error.message ? error.message.slice(0, 110) : "erro desconhecido") + ". Confira a conexão e tente novamente.", "error");
     return false;
   }
 }
@@ -111,7 +112,7 @@ function renderRoom(room) {
 }
 
 function startGame(mode) {
-  if (!ensureGame()) return;
+  if (!ensureGame()) return false;
   currentMode = mode;
   active = true;
   paused = false;
@@ -132,6 +133,7 @@ function startGame(mode) {
   hud.classList.remove("hidden");
   requestAnimationFrame(loop);
   if (matchMedia("(pointer:fine)").matches) canvas.requestPointerLock?.();
+  return true;
 }
 
 function loop(time) {
@@ -155,7 +157,10 @@ function returnToLobby() {
   paused = false;
   if (socket && currentRoom) socket.emit("room:leave");
   currentRoom = null;
-  game.setRemotePlayers([]);
+  if (game) game.setRemotePlayers([]);
+  soloButton.disabled = false;
+  const soloLabel = soloButton.querySelector("b");
+  if (soloLabel) soloLabel.textContent = "JOGAR SOZINHO";
   roomPanel.classList.add("hidden");
   hud.classList.add("hidden");
   pause.classList.add("hidden");
@@ -193,10 +198,16 @@ function resumeGame() {
   if (matchMedia("(pointer:fine)").matches) canvas.requestPointerLock?.();
 }
 
-document.getElementById("solo-button").addEventListener("click", () => {
+soloButton.addEventListener("click", () => {
   if (socket && currentRoom) socket.emit("room:leave");
   currentRoom = null;
-  startGame("solo");
+  soloButton.disabled = true;
+  const label = soloButton.querySelector("b");
+  if (label) label.textContent = "INICIANDO...";
+  if (!startGame("solo")) {
+    soloButton.disabled = false;
+    if (label) label.textContent = "JOGAR SOZINHO";
+  }
 });
 document.getElementById("quick-match-button").addEventListener("click", () => joinOrCreate("quick"));
 document.getElementById("create-room-button").addEventListener("click", () => joinOrCreate("create"));
@@ -271,7 +282,7 @@ if (socket) {
     currentRoom = room;
     startGame("multiplayer");
   });
-  socket.on("player:fire", (shot) => game.addRemoteShot(shot));
+  socket.on("player:fire", (shot) => { if (game && active) game.addRemoteShot(shot); });
   socket.on("player:move", (player) => {
     if (!currentRoom || !player || !player.id) return;
     const index = currentRoom.players.findIndex((item) => item.id === player.id);
@@ -281,7 +292,7 @@ if (socket) {
   socket.on("game:player-left", (playerId) => {
     if (!currentRoom) return;
     currentRoom.players = currentRoom.players.filter((player) => player.id !== playerId);
-    game.setRemotePlayers(currentRoom.players.filter((player) => player.id !== socket.id));
+    if (game) game.setRemotePlayers(currentRoom.players.filter((player) => player.id !== socket.id));
   });
 } else {
   setConnection(false, "Servidor indisponível");
@@ -289,3 +300,5 @@ if (socket) {
 }
 
 updateHud({ health: 100, score: 0, ammo: "12 / 60" });
+
+window.__zeroModuleReady = true;
