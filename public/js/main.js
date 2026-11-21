@@ -15,9 +15,35 @@ const readyButton = document.getElementById("ready-button");
 const startMatchButton = document.getElementById("start-match-button");
 const networkToast = document.getElementById("network-toast");
 const soloButton = document.getElementById("solo-button");
+const loadingScreen = document.getElementById("loading-screen");
+const loadingBar = document.getElementById("loading-bar");
+const loadingPercent = document.getElementById("loading-percent");
+const loadingMessage = document.getElementById("loading-message");
 
 let game = null;
 let input = null;
+let startupInProgress = false;
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+function setLoading(progress, message) {
+  const value = Math.max(0, Math.min(100, Math.round(progress)));
+  if (loadingBar) loadingBar.style.width = value + "%";
+  if (loadingPercent) loadingPercent.textContent = value + "%";
+  if (loadingMessage) loadingMessage.textContent = message;
+}
+function reportClientError(context, error) {
+  const payload = {
+    context: String(context || "unknown").slice(0, 48),
+    message: String(error && (error.stack || error.message) || error || "unknown error").slice(0, 1800),
+    userAgent: String(navigator.userAgent || "").slice(0, 300),
+    at: new Date().toISOString()
+  };
+  fetch("/api/client-log", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+    keepalive: true
+  }).catch(() => {});
+}
 function ensureGame() {
   if (game && input) return true;
   let candidate = null;
@@ -118,38 +144,75 @@ function renderRoom(room) {
   }
 }
 
-function startGame(mode) {
-  if (!ensureGame()) return false;
+async function startGame(mode) {
+  if (startupInProgress || active) return false;
+  startupInProgress = true;
+  if (loadingScreen) loadingScreen.classList.remove("hidden");
+  setLoading(5, "Preparando a arena...");
   try {
-  currentMode = mode;
-  active = true;
-  paused = false;
-  lastTime = performance.now();
-  lastNetworkSend = 0;
-  game.reset();
-  lastShotSequence = game.lastShotSequence || 0;
-  if (mode === "multiplayer" && currentRoom) {
-    if (game) game.setRemotePlayers(currentRoom.players.filter((player) => !socket || player.id !== socket.id));
-    document.getElementById("match-indicator").textContent = "SALA " + currentRoom.code;
-    networkToast.classList.add("hidden");
-  } else {
-    if (game) game.setRemotePlayers([]);
-    document.getElementById("match-indicator").textContent = "TREINO SOLO";
-  }
-  lobby.classList.add("hidden");
-  pause.classList.add("hidden");
-  hud.classList.remove("hidden");
-  requestAnimationFrame(loop);
-  if (matchMedia("(pointer:fine)").matches && !(navigator.maxTouchPoints > 0)) canvas.requestPointerLock?.();
-  hud.classList.toggle("touch-mode", navigator.maxTouchPoints > 0 || matchMedia("(pointer:coarse)").matches || window.innerWidth < 1000);
-  return true;
+    await nextFrame();
+    await nextFrame();
+    setLoading(18, "Inicializando o motor 3D...");
+    await new Promise((resolve) => window.setTimeout(resolve, 40));
+
+    if (!ensureGame()) throw new Error("O motor 3D não conseguiu iniciar. Verifique WebGL e tente novamente.");
+
+    setLoading(48, "Montando o mapa e os pontos de entrada...");
+    await nextFrame();
+    currentMode = mode;
+    paused = false;
+    lastNetworkSend = 0;
+    game.resize();
+    game.reset();
+    lastShotSequence = game.lastShotSequence || 0;
+
+    if (mode === "multiplayer" && currentRoom) {
+      game.setRemotePlayers(currentRoom.players.filter((player) => !socket || player.id !== socket.id));
+      document.getElementById("match-indicator").textContent = "SALA " + currentRoom.code;
+      networkToast.classList.add("hidden");
+    } else {
+      game.setRemotePlayers([]);
+      document.getElementById("match-indicator").textContent = "TREINO SOLO";
+    }
+
+    setLoading(76, "Preparando controles e interface...");
+    hud.classList.toggle("touch-mode",
+      navigator.maxTouchPoints > 0 ||
+      matchMedia("(pointer:coarse)").matches ||
+      window.innerWidth < 1000
+    );
+    hud.classList.remove("hidden");
+    await nextFrame();
+
+    setLoading(92, "Renderizando o primeiro quadro...");
+    game.renderFrame();
+    await nextFrame();
+
+    active = true;
+    lastTime = performance.now();
+    lobby.classList.add("hidden");
+    pause.classList.add("hidden");
+    setLoading(100, "Arena pronta!");
+    await nextFrame();
+    if (loadingScreen) loadingScreen.classList.add("hidden");
+    requestAnimationFrame(loop);
+
+    if (matchMedia("(pointer:fine)").matches && !(navigator.maxTouchPoints > 0)) {
+      canvas.requestPointerLock?.();
+    }
+    return true;
   } catch (error) {
     active = false;
+    paused = false;
     lobby.classList.remove("hidden");
     hud.classList.add("hidden");
-    showLobbyMessage("Falha ao entrar na partida: " + (error?.message || "erro desconhecido"), "error");
+    if (loadingScreen) loadingScreen.classList.add("hidden");
+    showLobbyMessage("Não foi possível iniciar: " + (error?.message || "erro desconhecido"), "error");
+    reportClientError("startGame", error);
     console.error("ZERO startGame failed:", error);
     return false;
+  } finally {
+    startupInProgress = false;
   }
 }
 
@@ -215,13 +278,15 @@ function resumeGame() {
   if (matchMedia("(pointer:fine)").matches) canvas.requestPointerLock?.();
 }
 
-soloButton.addEventListener("click", () => {
+soloButton.addEventListener("click", async () => {
+  if (startupInProgress || active) return;
   if (socket && currentRoom) socket.emit("room:leave");
   currentRoom = null;
   soloButton.disabled = true;
   const label = soloButton.querySelector("b");
   if (label) label.textContent = "INICIANDO...";
-  if (!startGame("solo")) {
+  const started = await startGame("solo");
+  if (!started) {
     soloButton.disabled = false;
     if (label) label.textContent = "JOGAR SOZINHO";
   }
@@ -274,7 +339,7 @@ document.addEventListener("visibilitychange", () => {
   if (document.hidden && active && !paused) pauseGame();
 });
 window.addEventListener("contextmenu", (event) => event.preventDefault());
-window.addEventListener("error", () => showToast("Ocorreu um erro. Volte ao lobby e tente novamente."));
+window.addEventListener("error", (event) => {\n  showToast("Ocorreu um erro. Confira a mensagem no lobby.");\n  if (window.__zeroModuleReady) reportClientError("window.error", event.error || event.message);\n});\nwindow.addEventListener("unhandledrejection", (event) => {\n  reportClientError("unhandledrejection", event.reason);\n});
 
 if (socket) {
   socket.on("connect", () => {
