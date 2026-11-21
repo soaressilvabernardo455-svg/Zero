@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths:
       - "public/js/game.js"
+      - "public/js/main.js"
+      - "public/js/input.js"
+      - "public/index.html"
 
 permissions:
   contents: write
@@ -100,8 +103,8 @@ jobs:
       - name: Publish permanent Android APK
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: zero-android-v1.0
-          name: ZERO Android v1.0
+          tag_name: zero-android-v1.1
+          name: ZERO Android v1.1
           body: |
             Versão Android oficial do ZERO.
             Compatível com orientação horizontal e interface de toque.
