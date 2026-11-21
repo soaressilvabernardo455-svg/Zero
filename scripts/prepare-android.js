@@ -23,7 +23,7 @@ if (fs.existsSync(manifest)) {
     xml = xml.replace("<manifest ", '<manifest xmlns:tools="http://schemas.android.com/tools" ');
     xml = xml.replace("<application", '<uses-permission android:name="android.permission.INTERNET" />\n    <application');
   }
-  xml = xml.replace(/(<activity\\b[^>]*android:name="[^"]*MainActivity"[^>]*)(>)/, (match, before, end) => {
+  xml = xml.replace(/(<activity\b[^>]*android:name="[^"]*MainActivity"[^>]*)(>)/, (match, before, end) => {
     if (before.includes("android:screenOrientation")) return match;
     return before + ' android:screenOrientation="landscape"' + end;
   });
