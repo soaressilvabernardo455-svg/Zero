@@ -414,7 +414,7 @@ export class Game {
   }
 
   updateDayNight(dt) {
-    // ZERO stays in daylight permanently; no night transition.
+    // ZERO stays in daylight permanently; no night transition. Final Android package build.
     this.dayPhase = 0.25;
     const palette = this.skyPalette;
     this.scene.background.set(0x91c8ed);
