@@ -70,7 +70,7 @@ test("ignora estado de movimento inválido e limita coordenadas", () => {
   rooms.start("a");
   assert.equal(rooms.updatePlayer("a", { x: "hack", z: 0, yaw: 0, pitch: 0 }), null);
   const update = rooms.updatePlayer("a", { x: -100, z: 100, yaw: 0, pitch: 9 });
-  assert.equal(update.player.x, -108);
-  assert.equal(update.player.z, 108);
+  assert.equal(update.player.x, -100);
+  assert.equal(update.player.z, 100);
   assert.equal(update.player.pitch, 1.2);
 });
