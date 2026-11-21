@@ -19,10 +19,13 @@ const loadingScreen = document.getElementById("loading-screen");
 const loadingBar = document.getElementById("loading-bar");
 const loadingPercent = document.getElementById("loading-percent");
 const loadingMessage = document.getElementById("loading-message");
+const fpsValue = document.getElementById("fps-value");
 
 let game = null;
 let input = null;
 let startupInProgress = false;
+let fpsFrames = 0;
+let fpsWindowStart = 0;
 const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
 function setLoading(progress, message) {
   const value = Math.max(0, Math.min(100, Math.round(progress)));
@@ -190,6 +193,8 @@ async function startGame(mode) {
 
     active = true;
     lastTime = performance.now();
+    fpsFrames = 0;
+    fpsWindowStart = lastTime;
     lobby.classList.add("hidden");
     pause.classList.add("hidden");
     setLoading(100, "Arena pronta!");
@@ -222,6 +227,12 @@ function loop(time) {
     const dt = Math.min((time - lastTime) / 1000 || 0, 0.04);
     lastTime = time;
     game.update(dt, input.consume());
+    fpsFrames++;
+    if (time - fpsWindowStart >= 500) {
+      if (fpsValue) fpsValue.textContent = String(Math.round(fpsFrames * 1000 / Math.max(1, time - fpsWindowStart)));
+      fpsFrames = 0;
+      fpsWindowStart = time;
+    }
     if (currentMode === "multiplayer" && currentRoom && socket && socket.connected && game.lastShotSequence !== lastShotSequence) {
       if (game.lastShot) socket.emit("player:fire", game.lastShot);
       lastShotSequence = game.lastShotSequence;
@@ -259,6 +270,8 @@ function returnToLobby() {
   hud.classList.add("hidden");
   pause.classList.add("hidden");
   lobby.classList.remove("hidden");
+  if (loadingScreen) loadingScreen.classList.add("hidden");
+  setLoading(5, "Preparando a arena...");
   networkToast.classList.add("hidden");
   if (document.pointerLockElement) document.exitPointerLock();
   showLobbyMessage("Escolha um modo para entrar na arena.");
@@ -292,7 +305,7 @@ function resumeGame() {
   if (matchMedia("(pointer:fine)").matches) canvas.requestPointerLock?.();
 }
 
-soloButton.addEventListener("click", async () => {
+async function launchSolo() {
   if (startupInProgress || active) return;
   if (socket && currentRoom) socket.emit("room:leave");
   currentRoom = null;
@@ -304,7 +317,14 @@ soloButton.addEventListener("click", async () => {
     soloButton.disabled = false;
     if (label) label.textContent = "JOGAR SOZINHO";
   }
+}
+soloButton.addEventListener("pointerup", (event) => {
+  if (event.pointerType === "touch") {
+    event.preventDefault();
+    void launchSolo();
+  }
 });
+soloButton.addEventListener("click", () => { void launchSolo(); });
 document.getElementById("quick-match-button").addEventListener("click", () => joinOrCreate("quick"));
 document.getElementById("create-room-button").addEventListener("click", () => joinOrCreate("create"));
 document.getElementById("join-room-button").addEventListener("click", () => joinOrCreate("join"));
