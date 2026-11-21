@@ -20,6 +20,14 @@ const threeBuildDir = path.join(__dirname, "node_modules", "three", "build");
 app.use("/vendor", express.static(threeBuildDir, { maxAge: "1d", immutable: true }));
 
 app.disable("x-powered-by");
+app.use(express.json({ limit: "8kb" }));
+app.post("/api/client-log", (req, res) => {
+  const context = String(req.body?.context || "client").replace(/[^a-zA-Z0-9_.-]/g, "").slice(0, 48);
+  const message = String(req.body?.message || "unknown client error").slice(0, 1800);
+  const userAgent = String(req.body?.userAgent || "").slice(0, 300);
+  console.error("[ZERO CLIENT]", JSON.stringify({ context, message, userAgent }));
+  res.status(204).end();
+});
 app.use(express.static(publicDir, {
   etag: true,
   // Do not let mobile browsers keep an old lobby after a deployment.
