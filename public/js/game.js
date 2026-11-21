@@ -221,7 +221,12 @@ export class Game {
       }
     }
     const mansionDoor = new THREE.MeshStandardMaterial({ color: 0x543b30 });
+    const mansionGlass = new THREE.MeshStandardMaterial({ color: 0x9ed9e7, emissive: 0x1d3e48, emissiveIntensity: 0.22, metalness: 0.18 });
     this.addBox(mansionX, 0, mansionZ - 8.12, 2.4, 3.1, 0.16, mansionDoor, false);
+    for (const side of [-1, 1]) {
+      this.addBox(mansionX + side * 6.2, 2.65, mansionZ - 8.12, 1.8, 1.45, 0.14, mansionGlass, false);
+      this.addBox(mansionX + side * 4.25, 8.2, mansionZ - 4.72, 1.7, 1.35, 0.14, mansionGlass, false);
+    }
     const columnMat = new THREE.MeshStandardMaterial({ color: 0xe9e0c9 });
     for (const side of [-1, 1]) {
       const column = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.48, 4.2, 10), columnMat);
