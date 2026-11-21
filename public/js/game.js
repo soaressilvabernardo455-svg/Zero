@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { WEAPONS } from "./weapons.js";
 import { CONFIG, clamp, normalize2 } from "./config.js";
+// APK build: camera weapon mount and weapon cycling fix.
 
 function makeFloorTexture() {
   const canvas = document.createElement("canvas");
