@@ -29,19 +29,29 @@ export class InputController {
       if (e.code === "KeyC") this.cameraPressed = true;
     });
     window.addEventListener("keyup", e => this.keys.delete(e.code));
-    window.addEventListener("blur", () => this.keys.clear());
+    window.addEventListener("blur", () => {
+      this.keys.clear();
+      this.firePressed = false;
+    });
 
     this.canvas.addEventListener("click", () => {
       if (matchMedia("(pointer:fine)").matches && !this.pointerLocked) this.canvas.requestPointerLock?.();
     });
     document.addEventListener("pointerlockchange", () => {
       this.pointerLocked = document.pointerLockElement === this.canvas;
+      if (!this.pointerLocked) this.firePressed = false;
     });
     document.addEventListener("mousemove", e => {
       if (this.pointerLocked) {
         this.look.x += e.movementX * 0.0022 * this.sensitivity;
         this.look.y += e.movementY * 0.0022 * this.sensitivity;
       }
+    });
+    document.addEventListener("mousedown", e => {
+      if (e.button === 0 && this.pointerLocked) this.firePressed = true;
+    });
+    document.addEventListener("mouseup", e => {
+      if (e.button === 0) this.firePressed = false;
     });
 
     const joy = document.getElementById("joystick-zone");
@@ -86,14 +96,12 @@ export class InputController {
     lookZone.addEventListener("pointerup", releaseLook);
     lookZone.addEventListener("pointercancel", releaseLook);
 
-    const hold = (id, prop) => {
-      const el = document.getElementById(id);
-      el.addEventListener("pointerdown", e => { e.preventDefault(); this[prop] = true; });
-      el.addEventListener("pointerup", () => { this[prop] = false; });
-      el.addEventListener("pointercancel", () => { this[prop] = false; });
-      el.addEventListener("pointerleave", () => { this[prop] = false; });
-    };
-    hold("fire-button", "firePressed");
+    const fire = document.getElementById("fire-button");
+    fire.addEventListener("pointerdown", e => { e.preventDefault(); this.firePressed = true; fire.setPointerCapture(e.pointerId); });
+    const stopFire = () => { this.firePressed = false; };
+    fire.addEventListener("pointerup", stopFire);
+    fire.addEventListener("pointercancel", stopFire);
+    fire.addEventListener("lostpointercapture", stopFire);
     document.getElementById("jump-button").addEventListener("pointerdown", e => { e.preventDefault(); this.jumpPressed = true; });
     document.getElementById("reload-button").addEventListener("click", () => { this.reloadPressed = true; });
     document.getElementById("camera-button").addEventListener("click", () => { this.cameraPressed = true; });
@@ -117,10 +125,10 @@ export class InputController {
       lookX: this.look.x,
       lookY: this.look.y,
       jump: this.jumpPressed || this.keys.has("Space"),
-      fire: this.firePressed || this.keys.has("Mouse0"),
+      fire: this.firePressed,
       reload: this.reloadPressed,
       camera: this.cameraPressed,
-      sprint: this.keys.has("ShiftLeft")
+      sprint: this.keys.has("ShiftLeft") || this.keys.has("ShiftRight")
     };
     this.look = { x: 0, y: 0 };
     this.jumpPressed = this.reloadPressed = this.cameraPressed = false;
