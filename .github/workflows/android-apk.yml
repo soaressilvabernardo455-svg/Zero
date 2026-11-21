@@ -2,12 +2,17 @@ name: Build ZERO Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "public/js/game.js"
 
 permissions:
   contents: read
 
 jobs:
   build:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[build-apk]')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
