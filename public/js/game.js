@@ -622,15 +622,6 @@ export class Game {
     this.playerVisual.rotation.y = this.yaw;
     this.currentStance = input.prone ? "prone" : input.crouch ? "crouch" : "stand";
     this.playerVisual.scale.y = input.prone ? 0.38 : input.crouch ? 0.68 : 1;
-    this.playerVisual.visible = this.cameraMode !== 0;
-    const parts = this.playerVisual.userData.parts;
-    const moving = Math.min(1, Math.hypot(move.x, move.y));
-    const stride = Math.sin(this.clock * 10) * 0.48 * moving;
-    parts.leftLeg.rotation.x = stride;
-    parts.rightLeg.rotation.x = -stride;
-    parts.leftArm.rotation.x = -stride * 0.58;
-    parts.rightArm.rotation.x = stride * 0.58;
-
     for (const target of this.targets) {
       const ai = target.userData;
       ai.phase += dt;
@@ -753,9 +744,6 @@ export class Game {
     this.clock = 0;
     this.lastShot = null;
     this.lastShotSequence = 0;
-    this.playerVisual.position.copy(this.player);
-    this.playerVisual.rotation.set(0, 0, 0);
-    this.playerVisual.visible = false;
     for (const target of this.targets) {
       target.userData.hit = 0;
       target.userData.aiShot = 1.2 + Math.random();
