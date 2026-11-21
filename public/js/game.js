@@ -576,6 +576,15 @@ export class Game {
     dt = Math.min(Math.max(dt, 0), 0.04);
     this.clock += dt;
     this.updateDayNight(dt);
+    const area = this.player.x < -48 && this.player.z > 45 ? "MANSÃO" :
+      this.player.z < -40 && Math.abs(this.player.x) < 60 ? "VILA DO NORTE" :
+      this.player.x > 48 ? "BOSQUE LESTE" :
+      this.player.x < -48 ? "PEDREIRA" :
+      this.player.z > 45 ? "VILA DO SUL" : "CAMPO CENTRAL";
+    if (area !== this._lastArea) {
+      this._lastArea = area;
+      this.onHud({ areaName: area });
+    }
     this.cooldown = Math.max(0, this.cooldown - dt);
     if (input.reload) this.reload();
     if (input.camera) this.cameraMode = (this.cameraMode + 1) % 3;
