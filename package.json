@@ -7,22 +7,14 @@
   "scripts": {
     "start": "node server.js",
     "test": "node --test",
-    "check": "node --check server.js && node --check public/js/game.js && node --check public/js/main.js && node --check public/js/input.js && node --check server/room-manager.js",
-    "android:prepare": "node scripts/prepare-android.js",
-    "postinstall": "node scripts/prepare-android.js"
+    "check": "node --check server.js && node --check public/js/game.js && node --check public/js/main.js && node --check public/js/input.js && node --check server/room-manager.js"
   },
   "dependencies": {
     "express": "^4.21.2",
     "socket.io": "^4.8.1",
-    "three": "^0.170.0",
-    "@capacitor/core": "^7.4.3",
-    "@capacitor/android": "^7.4.3",
-    "socket.io-client": "^4.8.1"
+    "three": "^0.170.0"
   },
   "engines": {
     "node": ">=20"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^7.4.3"
   }
 }
