@@ -12,6 +12,10 @@ export class InputController {
     this.reloadPressed = false;
     this.cameraPressed = false;
     this.sprintPressed = false;
+    this.crouch = false;
+    this.prone = false;
+    this.crouchPressed = false;
+    this.pronePressed = false;
     this.pointerLocked = false;
     this.joyPointer = null;
     this.lookPointer = null;
@@ -28,6 +32,8 @@ export class InputController {
       if (event.code === "Space") this.jumpPressed = true;
       if (event.code === "KeyR") this.reloadPressed = true;
       if (event.code === "KeyC") this.cameraPressed = true;
+      if (event.code === "ControlLeft" || event.code === "ControlRight") this.crouchPressed = true;
+      if (event.code === "KeyZ") this.pronePressed = true;
     });
     window.addEventListener("keyup", (event) => this.keys.delete(event.code));
     window.addEventListener("blur", () => {
@@ -110,6 +116,27 @@ export class InputController {
 
     const jump = document.getElementById("jump-button");
     jump.addEventListener("pointerdown", (event) => { event.preventDefault(); this.jumpPressed = true; });
+    const crouch = document.getElementById("crouch-button");
+    const prone = document.getElementById("prone-button");
+    const bindToggle = (button, key) => {
+      const toggle = (event) => {
+        event.preventDefault();
+        this[key] = !this[key];
+        button.classList.toggle("active", this[key]);
+        button.setAttribute("aria-pressed", String(this[key]));
+        if (this[key === "prone" ? "prone" : "crouch"]) {
+          const other = key === "prone" ? crouch : prone;
+          const otherKey = key === "prone" ? "crouch" : "prone";
+          this[otherKey] = false;
+          other.classList.remove("active");
+          other.setAttribute("aria-pressed", "false");
+        }
+      };
+      button.addEventListener("pointerdown", toggle);
+      button.addEventListener("click", (event) => { if (event.detail === 0) toggle(event); });
+    };
+    bindToggle(crouch, "crouch");
+    bindToggle(prone, "prone");
     const sprint = document.getElementById("sprint-button");
     const stopSprint = () => { this.sprintPressed = false; sprint.classList.remove("active"); };
     sprint.addEventListener("pointerdown", (event) => {
@@ -146,10 +173,15 @@ export class InputController {
       fire: this.firePressed,
       reload: this.reloadPressed,
       camera: this.cameraPressed,
-      sprint: this.sprintPressed || this.keys.has("ShiftLeft") || this.keys.has("ShiftRight")
+      sprint: this.sprintPressed || this.keys.has("ShiftLeft") || this.keys.has("ShiftRight"),
+      crouch: this.crouch,
+      prone: this.prone
     };
     this.look = { x: 0, y: 0 };
     this.jumpPressed = this.reloadPressed = this.cameraPressed = false;
+    if (this.crouchPressed) { this.crouch = !this.crouch; if (this.crouch) this.prone = false; }
+    if (this.pronePressed) { this.prone = !this.prone; if (this.prone) this.crouch = false; }
+    this.crouchPressed = this.pronePressed = false;
     return result;
   }
 
