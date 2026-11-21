@@ -17,7 +17,7 @@ export class Game {
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.player = new THREE.Vector3(0, 0, 12);
     this.velocityY = 0;
-    this.yaw = Math.PI;
+    this.yaw = 0;
     this.pitch = 0;
     this.grounded = true;
     this.health = 100;
@@ -174,7 +174,7 @@ export class Game {
     const forward=new THREE.Vector3(-Math.sin(this.yaw),0,-Math.cos(this.yaw));
     const right=new THREE.Vector3(Math.cos(this.yaw),0,-Math.sin(this.yaw));
     const speed=CONFIG.playerSpeed*(input.sprint?CONFIG.sprintMultiplier:1);
-    const delta=new THREE.Vector3().addScaledVector(forward,-move.y*speed*dt).addScaledVector(right,move.x*speed*dt);
+    const delta=new THREE.Vector3().addScaledVector(forward,move.y*speed*dt).addScaledVector(right,move.x*speed*dt);
     this.moveWithCollision(delta.x,delta.z);
 
     if(input.jump && this.grounded) {this.velocityY=CONFIG.jumpVelocity;this.grounded=false;}
