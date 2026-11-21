@@ -81,6 +81,7 @@ function updateHud(data) {
   if (data.health !== undefined) document.getElementById("health").textContent = data.health;
   if (data.score !== undefined) document.getElementById("score").textContent = data.score;
   if (data.ammo !== undefined) document.getElementById("ammo").textContent = data.ammo;
+  if (data.weaponName !== undefined) document.getElementById("weapon-name").textContent = data.weaponName;
   if (data.worldTime !== undefined) document.getElementById("world-time").textContent = data.worldTime;
   if (data.areaName !== undefined) document.getElementById("world-area").textContent = "ÁREA · " + data.areaName;
   if (data.hit) {
@@ -356,6 +357,7 @@ document.getElementById("copy-code-button").addEventListener("click", async () =
   }
 });
 
+document.getElementById("weapon-button").addEventListener("click", () => { if (game && active) game.cycleWeapon(1); });
 document.getElementById("exit-button").addEventListener("click", returnToLobby);
 document.getElementById("pause-exit-button").addEventListener("click", returnToLobby);
 document.getElementById("resume-button").addEventListener("click", resumeGame);
@@ -365,6 +367,7 @@ sensitivity.addEventListener("input", () => {
 });
 document.getElementById("quality").addEventListener("change", (event) => { if (game) game.setQuality(event.target.value); });
 window.addEventListener("keydown", (event) => {
+  if (event.code === "KeyQ" && active && !paused) { if (game) game.cycleWeapon(1); return; }
   if (event.code === "Escape" && active) {
     if (paused) resumeGame();
     else pauseGame();
