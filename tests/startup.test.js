@@ -24,7 +24,9 @@ test("solo startup waits for UI frames and renders before hiding the lobby", () 
   assert.match(main, /game\.renderFrame\(\)/);
   assert.ok(main.indexOf("game.renderFrame()") < main.indexOf('lobby.classList.add("hidden")'));
   assert.match(main, /startupInProgress/);
-  assert.match(main, /reportClientError\("startGame", error\)/);\n  assert.match(main, /pointerup/);\n  assert.match(main, /reportClientError\("game-loop", error\)/);
+  assert.match(main, /reportClientError\("startGame", error\)/);
+  assert.match(main, /pointerup/);
+  assert.match(main, /reportClientError\("game-loop", error\)/);
 });
 
 test("game supports first-frame rendering and permanently daytime lighting", () => {
