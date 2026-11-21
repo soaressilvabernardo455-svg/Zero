@@ -414,30 +414,19 @@ export class Game {
   }
 
   updateDayNight(dt) {
-    this.dayPhase = ((this.dayPhase ?? 0.25) + dt / 420) % 1;
-    const angle = this.dayPhase * Math.PI * 2;
-    const sunHeight = Math.sin(angle);
-    const daylight = Math.max(0, sunHeight);
-    const twilight = Math.max(0, 1 - Math.abs(sunHeight) * 3.2);
-    const night = 1 - daylight;
+    // ZERO stays in daylight permanently; no night transition.
+    this.dayPhase = 0.25;
     const palette = this.skyPalette;
-    palette.current.lerpColors(palette.night, palette.day, 0.12 + daylight * 0.88);
-    if (twilight > 0.01) palette.current.lerp(palette.sunset, twilight * 0.42);
-    this.scene.background.copy(palette.current);
-    this.scene.fog.color.copy(palette.current);
-    this.hemiLight.intensity = 0.28 + daylight * 1.22;
-    this.sunLight.intensity = 0.12 + daylight * 2.0 + twilight * 0.28;
-    this.sunLight.position.set(Math.cos(angle) * 85, Math.max(8, sunHeight * 95), Math.sin(angle) * 75);
-    this.sunLight.color.set(daylight > 0.55 ? 0xffefcf : twilight > 0.1 ? 0xffa879 : 0x819fdf);
-    this.renderer.toneMappingExposure = 1.0 + daylight * 0.18 + night * 0.06;
-
-    const minutes = (Math.floor(this.dayPhase * 1440) + 360) % 1440;
-    const hoursText = String(Math.floor(minutes / 60)).padStart(2, "0");
-    const minutesText = String(minutes % 60).padStart(2, "0");
-    const label = (daylight > 0.05 ? "DIA" : "NOITE") + " · " + hoursText + ":" + minutesText;
-    if (label !== this._lastWorldTime) {
-      this._lastWorldTime = label;
-      this.onHud({ worldTime: label });
+    this.scene.background.set(0x91c8ed);
+    this.scene.fog.color.set(0x91c8ed);
+    this.hemiLight.intensity = 1.5;
+    this.sunLight.intensity = 2.12;
+    this.sunLight.position.set(0, 95, 0);
+    this.sunLight.color.set(0xffefcf);
+    this.renderer.toneMappingExposure = 1.18;
+    if (this._lastWorldTime !== "DIA · 12:00") {
+      this._lastWorldTime = "DIA · 12:00";
+      this.onHud({ worldTime: "DIA · 12:00" });
     }
   }
 
