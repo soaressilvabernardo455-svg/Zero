@@ -200,7 +200,7 @@ export class Game {
     houses.forEach((house) => placeHouse(...house));
 
     // Mansão do Sul: dois andares, alas laterais e entrada com colunas.
-    const mansionX = -68, mansionZ = 65;
+    const mansionX = -68, mansionZ = 78;
     const mansionWall = new THREE.MeshStandardMaterial({ color: 0xd7d0b9, roughness: 0.78 });
     const mansionRoof = roofMaterial(0x493849);
     this.addBox(mansionX, 0, mansionZ, 22, 7.2, 16, mansionWall, true);
@@ -254,7 +254,7 @@ export class Game {
     const clearZones = [
       [-68, -61, 20, 17], [-38, -66, 17, 16], [-68, -35, 15, 15], [-39, -37, 18, 16],
       [45, -68, 18, 18], [76, -69, 16, 15], [45, -38, 15, 15], [77, -39, 18, 17],
-      [-68, 65, 30, 28], [42, 51, 18, 17], [76, 77, 18, 17], [44, 82, 19, 18],
+      [-68, 78, 30, 28], [42, 51, 18, 17], [76, 77, 18, 17], [44, 82, 19, 18],
       [0, 0, 17, 17], [0, 81, 18, 17]
     ];
     let placed = 0, attempts = 0;
