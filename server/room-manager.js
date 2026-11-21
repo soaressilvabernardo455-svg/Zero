@@ -38,7 +38,7 @@ export class RoomManager {
         name: cleanPlayerName(name),
         ready: false,
         x: 0,
-        z: 13,
+        z: 81,
         yaw: 0,
         pitch: 0
       }]])
@@ -68,7 +68,7 @@ export class RoomManager {
       name: cleanPlayerName(name),
       ready: false,
       x: room.players.size % 2 ? 4 : -4,
-      z: 13,
+      z: 81,
       yaw: 0,
       pitch: 0
     });
@@ -99,8 +99,8 @@ export class RoomManager {
     if (!room || !room.started || !state || typeof state !== "object") return null;
     const player = room.players.get(socketId);
     const valid = (value, min, max) => Number.isFinite(value) ? Math.max(min, Math.min(max, value)) : null;
-    const x = valid(state.x, -50, 50);
-    const z = valid(state.z, -50, 50);
+    const x = valid(state.x, -108, 108);
+    const z = valid(state.z, -108, 108);
     const yaw = valid(state.yaw, -100, 100);
     const pitch = valid(state.pitch, -1.2, 1.2);
     if (x === null || z === null || yaw === null || pitch === null) return null;
