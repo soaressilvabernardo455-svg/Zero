@@ -168,7 +168,10 @@
   #jump-button{right:46px;bottom:34px}
   .hud-actions{right:14px}
 }
-\n  </style>
+\n.world-state{margin-left:auto;padding:7px 10px;border:1px solid rgba(130,221,164,.22);border-radius:7px;background:rgba(11,34,28,.76);font-size:8px;font-weight:900;letter-spacing:.1em;color:#b7f2bd;white-space:nowrap}
+@media (pointer:coarse){.world-state{font-size:7px;padding:6px 7px}.hud-top{gap:5px}.hud-stats{flex-wrap:nowrap}}
+
+  </style>
   <script type="importmap">
     {
       "imports": {
@@ -229,9 +232,9 @@
         <div class="hud-stats">
           <div class="hud-chip"><i class="stat-health"></i><span>VIDA</span><strong id="health">100</strong></div>
           <div class="hud-chip"><i class="stat-score"></i><span>PONTOS</span><strong id="score">0</strong></div>
-          <div class="hud-chip"><i class="stat-ammo"></i><span>ENERGIA</span><strong id="ammo">12 / 60</strong></div>
+          <div class="hud-chip"><i class="stat-ammo"></i><span>MUNIÇÃO</span><strong id="ammo">12 / 60</strong></div>
         </div>
-        <div class="match-chip" id="match-indicator">TREINO SOLO</div>
+        <div class="world-state" id="world-time">DIA · 12:00</div><div class="match-chip" id="match-indicator">TREINO SOLO</div>
       </div>
       <div id="crosshair"><i></i><b></b></div>
       <div id="hit-feedback"></div>
