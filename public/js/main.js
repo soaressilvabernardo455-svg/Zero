@@ -218,18 +218,32 @@ async function startGame(mode) {
 
 function loop(time) {
   if (!active || paused) return;
-  const dt = Math.min((time - lastTime) / 1000 || 0, 0.04);
-  lastTime = time;
-  game.update(dt, input.consume());
-  if (currentMode === "multiplayer" && currentRoom && socket && socket.connected && game.lastShotSequence !== lastShotSequence) {
-    if (game.lastShot) socket.emit("player:fire", game.lastShot);
-    lastShotSequence = game.lastShotSequence;
+  try {
+    const dt = Math.min((time - lastTime) / 1000 || 0, 0.04);
+    lastTime = time;
+    game.update(dt, input.consume());
+    if (currentMode === "multiplayer" && currentRoom && socket && socket.connected && game.lastShotSequence !== lastShotSequence) {
+      if (game.lastShot) socket.emit("player:fire", game.lastShot);
+      lastShotSequence = game.lastShotSequence;
+    }
+    if (currentMode === "multiplayer" && currentRoom && socket && socket.connected && time - lastNetworkSend > 75) {
+      socket.emit("player:move", game.getNetworkState());
+      lastNetworkSend = time;
+    }
+    requestAnimationFrame(loop);
+  } catch (error) {
+    active = false;
+    paused = false;
+    hud.classList.add("hidden");
+    lobby.classList.remove("hidden");
+    if (loadingScreen) loadingScreen.classList.add("hidden");
+    soloButton.disabled = false;
+    const soloLabel = soloButton.querySelector("b");
+    if (soloLabel) soloLabel.textContent = "JOGAR SOZINHO";
+    showLobbyMessage("A partida encontrou um erro: " + (error?.message || "erro desconhecido"), "error");
+    reportClientError("game-loop", error);
+    console.error("ZERO game loop failed:", error);
   }
-  if (currentMode === "multiplayer" && currentRoom && socket && socket.connected && time - lastNetworkSend > 75) {
-    socket.emit("player:move", game.getNetworkState());
-    lastNetworkSend = time;
-  }
-  requestAnimationFrame(loop);
 }
 
 function returnToLobby() {
