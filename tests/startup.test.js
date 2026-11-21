@@ -18,6 +18,16 @@ test("lobby contains the loading screen and all controls required by InputContro
   }
 });
 
+test("every static DOM reference used by the game exists in the HTML", () => {
+  const input = readFileSync(new URL("../public/js/input.js", import.meta.url), "utf8");
+  const references = [...new Set([...main, input].flatMap((source) =>
+    [...source.matchAll(/getElementById\\(["']([^"']+)["']\\)/g)].map((match) => match[1])
+  ))];
+  for (const id of references) {
+    assert.match(html, new RegExp('id="' + id + '"'), "JavaScript references missing #" + id);
+  }
+});
+
 test("solo startup waits for UI frames and renders before hiding the lobby", () => {
   assert.match(main, /async function startGame\(mode\)/);
   assert.match(main, /await nextFrame\(\)/);
