@@ -289,7 +289,9 @@
   .settings-row{margin-top:5px;padding-top:5px}
 }
 
-  </style>
+  
+.lobby-wallet{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end}.lobby-wallet>span{padding:8px 10px;border:1px solid rgba(255,195,91,.24);border-radius:8px;background:rgba(9,25,40,.8);font-size:10px;color:#ffd58a}.lobby-wallet>span+span{color:#9fe9ff;border-color:rgba(85,217,245,.24)}.armory-link{padding:9px 12px;border:1px solid rgba(85,217,245,.45);border-radius:8px;background:linear-gradient(110deg,#123e59,#18335c);color:#c8f7ff;text-decoration:none;font-size:9px;font-weight:950;letter-spacing:.08em;white-space:nowrap}@media(max-width:620px){.lobby-topbar{align-items:flex-start;gap:8px}.lobby-wallet{gap:5px}.lobby-wallet>span{padding:6px 7px;font-size:8px}.armory-link{padding:7px 8px;font-size:8px}}@media(orientation:landscape) and (max-height:620px){.lobby-wallet>span{padding:5px 7px}.armory-link{padding:6px 8px}}
+</style>
   <script type="importmap">
     {
       "imports": {
@@ -305,7 +307,7 @@
     <section id="lobby" class="screen">
       <div class="lobby-topbar">
         <div class="brand-lockup"><div class="brand-mark">Z</div><div><strong>ZERO</strong><small>COMBAT SIMULATION</small></div></div>
-        <div class="build-tag"><span class="live-dot"></span> ARENA ONLINE</div>
+        <div class="build-tag"><span class="live-dot"></span> ARENA ONLINE</div><div class="lobby-wallet"><span>🪙 <b id="lobby-coins">1.200</b></span><span>💎 <b id="lobby-gems">40</b></span><a href="/armory.html" class="armory-link">ARSENAL & LOJA ↗</a></div>
       </div>
       <div class="lobby-layout">
         <section class="hero-copy">
